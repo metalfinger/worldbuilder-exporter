@@ -1,7 +1,6 @@
 import * as THREE from "three";
 import { FBXLoader } from "three/addons/loaders/FBXLoader.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { TGALoader } from "three/addons/loaders/TGALoader.js";
 import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
 
 let mixer;
@@ -47,6 +46,10 @@ directionalLight.shadow.mapSize.width = 2048;
 directionalLight.shadow.mapSize.height = 2048;
 scene.add(directionalLight);
 
+const fillLight = new THREE.DirectionalLight(0xffffff, 1);
+fillLight.position.set(-5, 2, -5);
+scene.add(fillLight);
+
 // Ground Plane
 const groundGeo = new THREE.PlaneGeometry(100, 100);
 const groundMat = new THREE.MeshStandardMaterial({
@@ -83,45 +86,50 @@ new RGBELoader()
 
 // Texture Loader
 console.log("Starting to load textures...");
-const tgaLoader = new TGALoader();
-const bodyAlbedo = tgaLoader.load(
-	"./GLBandFBX/body_albedo.tga",
-	() => console.log("Loaded body_albedo.tga"),
+const characterTextureLoader = new THREE.TextureLoader();
+
+const albedoMap = characterTextureLoader.load(
+	"./GLBandFBX_010725/char01_albedo.webp",
+	() => console.log("Loaded char01_albedo.webp"),
 	undefined,
-	(error) => console.error("Error loading body_albedo.tga", error)
+	(error) => console.error("Error loading char01_albedo.webp", error)
 );
-bodyAlbedo.colorSpace = THREE.SRGBColorSpace;
-const bodyNormal = tgaLoader.load(
-	"./GLBandFBX/body_normal.tga",
-	() => console.log("Loaded body_normal.tga"),
+albedoMap.colorSpace = THREE.SRGBColorSpace;
+
+const normalMap = characterTextureLoader.load(
+	"./GLBandFBX_010725/char01_normal.webp",
+	() => console.log("Loaded char01_normal.webp"),
 	undefined,
-	(error) => console.error("Error loading body_normal.tga", error)
+	(error) => console.error("Error loading char01_normal.webp", error)
 );
-const accessoriesAlbedo = tgaLoader.load(
-	"./GLBandFBX/accessories_albedo.tga",
-	() => console.log("Loaded accessories_albedo.tga"),
+
+const metalnessMap = characterTextureLoader.load(
+	"./GLBandFBX_010725/char01_metalness.webp",
+	() => console.log("Loaded char01_metalness.webp"),
 	undefined,
-	(error) => console.error("Error loading accessories_albedo.tga", error)
+	(error) => console.error("Error loading char01_metalness.webp", error)
 );
-accessoriesAlbedo.colorSpace = THREE.SRGBColorSpace;
-const accessoriesNormal = tgaLoader.load(
-	"./GLBandFBX/accessories_normal.tga",
-	() => console.log("Loaded accessories_normal.tga"),
+
+const roughnessMap = characterTextureLoader.load(
+	"./GLBandFBX_010725/char01_roughness.webp",
+	() => console.log("Loaded char01_roughness.webp"),
 	undefined,
-	(error) => console.error("Error loading accessories_normal.tga", error)
+	(error) => console.error("Error loading char01_roughness.webp", error)
 );
 
 // Model
 console.log("Starting to load model...");
 const loader = new FBXLoader();
 loader.load(
-	"./GLBandFBX/Walking.fbx",
+	"./GLBandFBX_010725/Char01_FBX.fbx",
 	function (object) {
 		console.log("Model loaded successfully.");
 
-		mixer = new THREE.AnimationMixer(object);
-		const action = mixer.clipAction(object.animations[0]);
-		action.play();
+		if (object.animations && object.animations.length > 0) {
+			mixer = new THREE.AnimationMixer(object);
+			const action = mixer.clipAction(object.animations[0]);
+			action.play();
+		}
 
 		const model = object;
 		model.scale.setScalar(0.01);
@@ -138,24 +146,14 @@ loader.load(
 				: [node.material];
 
 			materials.forEach((material) => {
-				const materialName = material.name.toLowerCase();
-
-				if (materialName === "char01") {
-					console.log(`Applying body textures to material ${material.name}`);
-					material.map = bodyAlbedo;
-					material.normalMap = bodyNormal;
-					material.needsUpdate = true;
-				} else if (
-					materialName.includes("accessories") ||
-					materialName.includes("headset")
-				) {
-					console.log(
-						`Applying accessories textures to material ${material.name}`
-					);
-					material.map = accessoriesAlbedo;
-					material.normalMap = accessoriesNormal;
-					material.needsUpdate = true;
-				}
+				console.log(`Applying PBR textures to material ${material.name}`);
+				material.map = albedoMap;
+				material.normalMap = normalMap;
+				material.metalnessMap = metalnessMap;
+				material.roughnessMap = roughnessMap;
+				material.metalness = 1.0;
+				material.roughness = 1.0;
+				material.needsUpdate = true;
 			});
 		});
 
@@ -175,7 +173,7 @@ function animate() {
 	if (mixer) mixer.update(delta);
 
 	if (groundTexture) {
-		groundTexture.offset.y -= 0.01;
+		// groundTexture.offset.y -= 0.01;
 	}
 
 	controls.update();
