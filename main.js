@@ -27,6 +27,7 @@ renderer.setPixelRatio(window.devicePixelRatio);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.25;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 document.body.appendChild(renderer.domElement);
 
@@ -36,7 +37,7 @@ controls.enableDamping = true;
 controls.target.set(0, 1, 0);
 
 // Lighting
-const hemisphereLight = new THREE.HemisphereLight(0x444444, 0xbbbbbb, 1);
+const hemisphereLight = new THREE.HemisphereLight(0x444444, 0xbbbbbb, 2);
 scene.add(hemisphereLight);
 
 const directionalLight = new THREE.DirectionalLight(0xffffff, 4);
