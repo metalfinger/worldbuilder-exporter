@@ -7,6 +7,89 @@
 		<link rel="stylesheet" href="style.css" />
 	</head>
 	<body>
+		<div id="brush2dIndicator"></div>
+		<div id="sticker-preview"></div>
+
+		<div id="toolbar">
+			<div id="mode-status">Paint Mode</div>
+			<div class="tool-group" id="mode-selector">
+				<button id="paintBtn" class="tool-button active" title="Paint Mode">
+					<!-- SVG icon for paint brush -->
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						viewBox="0 0 24 24"
+						width="24"
+						height="24"
+					>
+						<path
+							fill="currentColor"
+							d="M17.25,2.1C16.5,1.35 15.3,1.35 14.55,2.1L12.5,4.15L15.85,7.5L17.9,5.45C18.65,4.7 18.65,3.5 17.9,2.75L17.25,2.1M4,13.25V17H7.75L15.1,9.65L11.75,6.3L4,13.25Z"
+						></path>
+					</svg>
+				</button>
+				<button id="rotateBtn" class="tool-button" title="Rotate Mode">
+					<!-- SVG icon for rotate/move -->
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						viewBox="0 0 24 24"
+						width="24"
+						height="24"
+					>
+						<path
+							fill="currentColor"
+							d="M11,6.5V2H13V6.5H11M17.5,11H22V13H17.5V11M11,17.5V22H13V17.5H11M6.5,13H2V11H6.5V13M12,8A4,4 0 0,0 8,12A4,4 0 0,0 12,16A4,4 0 0,0 16,12A4,4 0 0,0 12,8Z"
+						></path>
+					</svg>
+				</button>
+				<button id="stickerBtn" class="tool-button" title="Sticker Mode">
+					<!-- SVG icon for sticker -->
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						viewBox="0 0 24 24"
+						width="24"
+						height="24"
+					>
+						<path
+							fill="currentColor"
+							d="M5.5,2C3.56,2 2,3.56 2,5.5V18.5C2,20.44 3.56,22 5.5,22H16L22,16V5.5C22,3.56 20.44,2 18.5,2H5.5M5,8H12V10H5V8M5,12H9V14H5V12Z"
+						></path>
+					</svg>
+				</button>
+			</div>
+			<div class="tool-group" id="brush-controls">
+				<div class="control-item">
+					<label for="brushColor">Color</label>
+					<input type="color" id="brushColor" value="#ff0000" />
+				</div>
+				<div class="control-item">
+					<label for="brushSize"
+						>Size: <span id="brushSizeValue">20</span>px</label
+					>
+					<input type="range" id="brushSize" min="1" max="100" value="20" />
+				</div>
+				<div class="control-item">
+					<label for="brushOpacity"
+						>Opacity: <span id="brushOpacityValue">1.0</span></label
+					>
+					<input
+						type="range"
+						id="brushOpacity"
+						min="0.05"
+						max="1"
+						step="0.05"
+						value="1"
+					/>
+				</div>
+			</div>
+		</div>
+
+		<div id="sticker-drawer">
+			<h3>Stickers</h3>
+			<div id="sticker-list">
+				<!-- Stickers will be dynamically loaded here -->
+			</div>
+		</div>
+
 		<script type="importmap">
 			{
 				"imports": {

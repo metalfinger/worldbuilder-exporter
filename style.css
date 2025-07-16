@@ -6,3 +6,175 @@ body {
 canvas {
 	display: block;
 }
+
+input[type="range"] {
+	width: 100px;
+}
+
+#brush2dIndicator {
+	position: fixed;
+	pointer-events: none;
+	z-index: 20;
+	display: none;
+	border-radius: 50%;
+	border: 2px solid white;
+	box-shadow: 0 0 0 2px black;
+}
+
+/* New Toolbar Styling */
+#toolbar {
+	position: fixed;
+	bottom: 20px;
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 10;
+	background: rgba(34, 34, 34, 0.9); /* Dark, semi-transparent background */
+	backdrop-filter: blur(10px); /* Frosted glass effect */
+	padding: 8px;
+	border-radius: 12px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	color: #f0f0f0;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+		Arial, sans-serif;
+	border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#mode-status {
+	font-size: 14px;
+	font-weight: 600;
+	padding: 0 12px;
+	color: #007aff;
+	background-color: rgba(0, 122, 255, 0.1);
+	border-radius: 8px;
+	height: 36px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.tool-group {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 0 8px;
+}
+
+#mode-selector {
+	background-color: rgba(255, 255, 255, 0.1);
+	border-radius: 8px;
+	padding: 4px;
+}
+
+.tool-button {
+	background: transparent;
+	border: none;
+	padding: 8px;
+	border-radius: 6px;
+	cursor: pointer;
+	color: #f0f0f0;
+	transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.tool-button:hover {
+	background-color: rgba(255, 255, 255, 0.2);
+}
+
+.tool-button.active {
+	background-color: #007aff; /* A bright color to indicate active state */
+	color: white;
+}
+
+.control-item {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 4px;
+}
+
+.control-item label {
+	font-size: 12px;
+	font-weight: 500;
+	color: #a0a0a0;
+}
+
+.control-item input[type="range"] {
+	width: 120px;
+	margin: 0;
+}
+
+.control-item input[type="color"] {
+	width: 32px;
+	height: 32px;
+	border: none;
+	padding: 0;
+	border-radius: 6px;
+	background-color: transparent;
+}
+
+/* Sticker Drawer and Preview Styling */
+#sticker-drawer {
+	position: fixed;
+	right: -160px; /* Start off-screen */
+	top: 0;
+	width: 120px;
+	height: 100%;
+	background: rgba(45, 45, 45, 0.95);
+	backdrop-filter: blur(10px);
+	box-shadow: -4px 0 15px rgba(0, 0, 0, 0.2);
+	transition: right 0.3s ease-in-out;
+	z-index: 100;
+	color: #f0f0f0;
+	padding: 20px;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+		Arial, sans-serif;
+	border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#sticker-drawer.open {
+	right: 0; /* Slide in */
+}
+
+#sticker-list {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 10px;
+	overflow-y: auto;
+	height: calc(100% - 60px);
+	padding-right: 10px; /* Add some padding for the scrollbar */
+}
+
+.sticker-item {
+	width: 100%;
+	aspect-ratio: 1 / 1;
+	background-color: rgba(255, 255, 255, 0.1);
+	border-radius: 8px;
+	cursor: pointer;
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+	border: 1px solid transparent;
+}
+
+.sticker-item:hover {
+	transform: scale(1.05);
+}
+
+.sticker-item.selected {
+	box-shadow: 0 0 0 3px #007aff;
+	border-color: #007aff;
+}
+
+#sticker-preview {
+	position: fixed;
+	pointer-events: none;
+	z-index: 110;
+	display: none;
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+	opacity: 0.7;
+}
