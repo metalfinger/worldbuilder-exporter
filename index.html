@@ -7,54 +7,95 @@
 		<link rel="stylesheet" href="style.css" />
 	</head>
 	<body>
+		<!-- Add recording indicator -->
+		<div
+			id="recording-indicator"
+			style="
+				display: none;
+				position: fixed;
+				top: 20px;
+				left: 50%;
+				transform: translateX(-50%);
+				background: rgba(0, 0, 0, 0.7);
+				color: white;
+				padding: 10px 20px;
+				border-radius: 5px;
+				z-index: 1000;
+			"
+		>
+			Recording in progress...
+		</div>
+
 		<div id="brush2dIndicator"></div>
 		<div id="sticker-preview"></div>
 
 		<div id="toolbar">
-			<div id="mode-status">Paint Mode</div>
+			<div id="mode-status">Rotate Mode</div>
 			<div class="tool-group" id="mode-selector">
-				<button id="paintBtn" class="tool-button active" title="Paint Mode">
-					<!-- SVG icon for paint brush -->
+				<button id="rotateBtn" class="tool-button active" title="Rotate Mode">
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						viewBox="0 0 24 24"
 						width="24"
 						height="24"
 					>
+						<path fill="none" d="M0 0h24v24H0z" />
 						<path
+							d="M11 6.5V2h2v4.5h-2zm6.5 4.5H22v2h-4.5v-2zm-11 0H2v2h4.5v-2zM11 17.5V22h2v-4.5h-2zM8 12c0-2.21 1.79-4 4-4s4 1.79 4 4-1.79 4-4 4-4-1.79-4-4z"
 							fill="currentColor"
-							d="M17.25,2.1C16.5,1.35 15.3,1.35 14.55,2.1L12.5,4.15L15.85,7.5L17.9,5.45C18.65,4.7 18.65,3.5 17.9,2.75L17.25,2.1M4,13.25V17H7.75L15.1,9.65L11.75,6.3L4,13.25Z"
-						></path>
+						/>
 					</svg>
 				</button>
-				<button id="rotateBtn" class="tool-button" title="Rotate Mode">
-					<!-- SVG icon for rotate/move -->
+				<button id="paintBtn" class="tool-button" title="Paint Mode">
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						viewBox="0 0 24 24"
 						width="24"
 						height="24"
 					>
+						<path fill="none" d="M0 0h24v24H0z" />
 						<path
+							d="M17.25 2.1C16.5 1.35 15.3 1.35 14.55 2.1L12.5 4.15 15.85 7.5 17.9 5.45C18.65 4.7 18.65 3.5 17.9 2.75L17.25 2.1M4 13.25V17h3.75L15.1 9.65 11.75 6.3 4 13.25z"
 							fill="currentColor"
-							d="M11,6.5V2H13V6.5H11M17.5,11H22V13H17.5V11M11,17.5V22H13V17.5H11M6.5,13H2V11H6.5V13M12,8A4,4 0 0,0 8,12A4,4 0 0,0 12,16A4,4 0 0,0 16,12A4,4 0 0,0 12,8Z"
-						></path>
+						/>
 					</svg>
 				</button>
 				<button id="stickerBtn" class="tool-button" title="Sticker Mode">
-					<!-- SVG icon for sticker -->
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						viewBox="0 0 24 24"
 						width="24"
 						height="24"
 					>
+						<path fill="none" d="M0 0h24v24H0z" />
 						<path
+							d="M5.5 2C3.56 2 2 3.56 2 5.5v13C2 20.44 3.56 22 5.5 22H16l6-6V5.5C22 3.56 20.44 2 18.5 2H5.5zm0 6h6.5v2H5.5V8zm0 4h3.5v2H5.5v-4z"
 							fill="currentColor"
-							d="M5.5,2C3.56,2 2,3.56 2,5.5V18.5C2,20.44 3.56,22 5.5,22H16L22,16V5.5C22,3.56 20.44,2 18.5,2H5.5M5,8H12V10H5V8M5,12H9V14H5V12Z"
-						></path>
+						/>
 					</svg>
 				</button>
+				<button id="recordBtn" class="tool-button" title="Record">
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						viewBox="0 0 24 24"
+						width="24"
+						height="24"
+					>
+						<path fill="none" d="M0 0h24v24H0z" />
+						<circle cx="12" cy="12" r="8" fill="red" />
+					</svg>
+				</button>
+			</div>
+			<!-- Recording Confirmation Buttons -->
+			<div
+				id="record-confirm-controls"
+				class="tool-group"
+				style="display: none"
+			>
+				<button id="startRecordBtn" class="tool-button-confirm">
+					Start Recording
+				</button>
+				<button id="cancelRecordBtn" class="tool-button-cancel">Cancel</button>
 			</div>
 			<div class="tool-group" id="brush-controls">
 				<div class="control-item">
@@ -81,14 +122,29 @@
 					/>
 				</div>
 			</div>
-		</div>
-
-		<div id="sticker-drawer">
-			<h3>Stickers</h3>
-			<div id="sticker-list">
-				<!-- Stickers will be dynamically loaded here -->
+			<!-- New Sticker Tray for better UX -->
+			<div
+				id="sticker-tray"
+				class="tool-group"
+				style="display: none; width: 100%; justify-content: center"
+			>
+				<div
+					id="sticker-list"
+					style="
+						display: flex;
+						gap: 15px;
+						overflow-x: auto;
+						padding: 10px;
+						width: 90%;
+					"
+				>
+					<!-- Stickers will be dynamically loaded here -->
+				</div>
 			</div>
 		</div>
+
+		<!-- Add audio element for recording -->
+		<audio id="recording-audio" src="./assets/audio.mp3" preload="auto"></audio>
 
 		<script type="importmap">
 			{

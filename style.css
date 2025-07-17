@@ -87,6 +87,36 @@ input[type="range"] {
 	color: white;
 }
 
+.tool-button-confirm {
+	background-color: #34c759; /* Green for confirmation */
+	color: white;
+	padding: 8px 16px;
+	border: none;
+	border-radius: 6px;
+	cursor: pointer;
+	font-weight: 600;
+	transition: background-color 0.2s ease;
+}
+
+.tool-button-confirm:hover {
+	background-color: #2fb350;
+}
+
+.tool-button-cancel {
+	background-color: #555; /* Neutral gray */
+	color: white;
+	padding: 8px 16px;
+	border: none;
+	border-radius: 6px;
+	cursor: pointer;
+	font-weight: 600;
+	transition: background-color 0.2s ease;
+}
+
+.tool-button-cancel:hover {
+	background-color: #666;
+}
+
 .control-item {
 	display: flex;
 	flex-direction: column;
@@ -168,6 +198,11 @@ input[type="range"] {
 	border-color: #007aff;
 }
 
+#sticker-tray .sticker-item {
+	min-width: 60px; /* Give stickers a fixed size in the tray */
+	height: 60px;
+}
+
 #sticker-preview {
 	position: fixed;
 	pointer-events: none;
@@ -177,4 +212,54 @@ input[type="range"] {
 	background-repeat: no-repeat;
 	background-position: center;
 	opacity: 0.7;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+	#toolbar {
+		flex-direction: column;
+		gap: 10px;
+		padding: 10px;
+		bottom: 0;
+		left: 0;
+		transform: none;
+		width: 100%;
+		border-radius: 0;
+	}
+
+	.tool-group {
+		flex-direction: row;
+		justify-content: center;
+	}
+
+	.tool-button {
+		padding: 12px;
+	}
+
+	.control-item input[type="range"] {
+		width: 80%;
+	}
+
+	#sticker-drawer {
+		width: 100%;
+		height: auto;
+		top: auto;
+		bottom: -100%;
+		right: 0;
+		transition: bottom 0.3s ease-in-out;
+	}
+
+	#sticker-drawer.open {
+		bottom: 0;
+		right: 0;
+	}
+
+	#sticker-list {
+		grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+		height: auto;
+	}
+
+	canvas {
+		height: calc(100vh - 100px); /* Adjust for toolbar height */
+	}
 }
