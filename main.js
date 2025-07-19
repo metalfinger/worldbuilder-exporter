@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { setupScene } from "./modules/sceneSetup.js";
 import { loadModel, getCharacterTextures } from "./modules/modelManager.js";
 import { setupAnimation, getMixer } from "./modules/animationManager.js";
-import { setupUI } from "./modules/uiManager.js";
+import { setupUI, initializeMasks } from "./modules/uiManager.js";
 import {
 	setupRecording,
 	getRecordingMixer,
@@ -23,6 +23,9 @@ loadModel(scene, (model) => {
 
 	// 5. Recording Setup
 	setupRecording(renderer, scene, getCharacterTextures());
+
+	// Initialize masks after model and textures are loaded
+	initializeMasks();
 
 	// Start the animation loop once the model is loaded
 	animate(mixer);

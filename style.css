@@ -1,265 +1,2185 @@
-body {
+/* =================================
+   DESIGN SYSTEM - UNIFIED VARIABLES
+   ================================= */
+:root {
+	/* Primary Brand Colors */
+	--primary-color: #0078d4;
+	--primary-hover: #106ebe;
+	--primary-active: #005a9e;
+	--primary-light: rgba(0, 120, 212, 0.15);
+	--primary-glow: rgba(0, 120, 212, 0.3);
+
+	/* Secondary Accent Colors */
+	--secondary-color: #6c757d;
+	--secondary-hover: #5a6268;
+	--secondary-light: rgba(108, 117, 125, 0.15);
+
+	/* Glass Effect Variables */
+	--glass-bg: rgba(15, 15, 15, 0.85);
+	--glass-bg-light: rgba(255, 255, 255, 0.12);
+	--glass-border: rgba(255, 255, 255, 0.18);
+	--glass-border-hover: rgba(255, 255, 255, 0.25);
+	--glass-blur: blur(16px);
+	--glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+
+	/* Text Colors - Improved Contrast */
+	--text-primary: #ffffff;
+	--text-secondary: rgba(255, 255, 255, 0.85);
+	--text-tertiary: rgba(255, 255, 255, 0.65);
+	--text-accent: var(--primary-color);
+
+	/* Status Colors */
+	--success-color: #28a745;
+	--warning-color: #ffc107;
+	--error-color: #dc3545;
+	--info-color: var(--primary-color);
+
+	/* Component Sizing */
+	--border-radius: 12px;
+	--border-radius-small: 8px;
+	--spacing-sm: 8px;
+	--spacing-md: 16px;
+	--spacing-lg: 24px;
+}
+
+/* =================================
+   GLOBAL STYLES
+   ================================= */
+* {
 	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+body {
+	font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+	background: #1a1a1a;
+	color: #e0e0e0;
+	height: 100vh;
 	overflow: hidden;
 }
 
-canvas {
-	display: block;
-}
-
-input[type="range"] {
-	width: 100px;
-}
-
-#brush2dIndicator {
+/* =================================
+   3D VIEWPORT
+   ================================= */
+.viewport-container {
 	position: fixed;
-	pointer-events: none;
-	z-index: 20;
-	display: none;
-	border-radius: 50%;
-	border: 2px solid white;
-	box-shadow: 0 0 0 2px black;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background: #1a1a1a;
+	z-index: 1;
+	transform: translate3d(0, 0, 0);
+	will-change: transform;
 }
 
-/* New Toolbar Styling */
-#toolbar {
+/* =================================
+   UNIFIED PANEL SYSTEM
+   ================================= */
+
+/* Base Panel Class - ALL panels inherit this */
+.floating-top-bar,
+.floating-toolbar,
+.floating-layers-panel,
+.floating-brush-panel,
+.floating-sticker-panel,
+.floating-minimap,
+.floating-record-panel,
+.notification {
+	background: var(--glass-bg);
+	backdrop-filter: var(--glass-blur);
+	-webkit-backdrop-filter: var(--glass-blur);
+	border: 1px solid var(--glass-border);
+	border-radius: var(--border-radius);
+	box-shadow: var(--glass-shadow);
+	color: var(--text-primary);
+	font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+	transform: translate3d(0, 0, 0);
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Unified hover effects */
+.floating-top-bar:hover,
+.floating-toolbar:hover,
+.floating-layers-panel:hover,
+.floating-brush-panel:hover,
+.floating-sticker-panel:hover,
+.floating-minimap:hover,
+.floating-record-panel:hover {
+	border-color: var(--glass-border-hover);
+	box-shadow: var(--glass-shadow), 0 0 20px var(--primary-glow);
+}
+
+/* =================================
+   SPECIFIC PANEL POSITIONING
+   ================================= */
+
+/* Top Bar - WorldBuilder Title */
+.floating-top-bar {
 	position: fixed;
-	bottom: 20px;
+	top: var(--spacing-lg);
 	left: 50%;
 	transform: translateX(-50%);
-	z-index: 10;
-	background: rgba(34, 34, 34, 0.9); /* Dark, semi-transparent background */
-	backdrop-filter: blur(10px); /* Frosted glass effect */
-	padding: 8px;
-	border-radius: 12px;
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 	display: flex;
 	align-items: center;
-	gap: 16px;
-	color: #f0f0f0;
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
-		Arial, sans-serif;
-	border: 1px solid rgba(255, 255, 255, 0.1);
+	gap: var(--spacing-lg);
+	padding: var(--spacing-sm) var(--spacing-md);
+	z-index: 100;
 }
 
-#mode-status {
+.floating-top-bar:hover {
+	transform: translateX(-50%) translateY(-2px);
+}
+
+/* Left Toolbar */
+.floating-toolbar {
+	position: fixed;
+	top: 50%;
+	left: var(--spacing-lg);
+	transform: translateY(-50%);
+	display: flex;
+	flex-direction: column;
+	gap: var(--spacing-sm);
+	padding: var(--spacing-md);
+	z-index: 100;
+}
+
+/* Right Layers Panel */
+.floating-layers-panel {
+	position: fixed;
+	top: 50%;
+	right: var(--spacing-lg);
+	transform: translateY(-50%);
+	width: 80px;
+	padding: var(--spacing-md);
+	z-index: 90;
+	display: none;
+}
+
+/* Bottom Left Brush/Sticker Panel */
+.floating-brush-panel,
+.floating-sticker-panel {
+	position: fixed;
+	bottom: var(--spacing-lg);
+	left: var(--spacing-lg);
+	width: 280px;
+	padding: var(--spacing-lg);
+	display: none;
+	z-index: 90;
+}
+
+/* Top Right Minimap */
+.floating-minimap {
+	position: fixed;
+	top: var(--spacing-lg);
+	right: var(--spacing-lg);
+	width: 180px;
+	padding: var(--spacing-md);
+	z-index: 80;
+	display: none;
+}
+
+/* Bottom Center Record Panel */
+.floating-record-panel {
+	position: fixed;
+	bottom: var(--spacing-lg);
+	left: 50%;
+	transform: translateX(-50%);
+	padding: var(--spacing-lg);
+	display: none;
+	z-index: 90;
+}
+
+/* Top Right Notifications - Positioned below undo/redo panel */
+.notification {
+	position: fixed;
+	top: calc(var(--spacing-lg) + 60px); /* Below undo/redo panel */
+	right: var(--spacing-lg);
+	padding: var(--spacing-md) var(--spacing-lg);
+	font-size: 14px;
+	font-weight: 500;
+	z-index: 1000;
+	transform: translateX(400px);
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	max-width: 300px;
+	word-wrap: break-word;
+}
+
+.notification.show {
+	transform: translateX(0);
+}
+
+/* =================================
+   PANEL CONTENT STYLING
+   ================================= */
+
+/* Unified Panel Headers */
+.panel-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: var(--spacing-md);
+	padding-bottom: var(--spacing-sm);
+	border-bottom: 1px solid var(--glass-border);
+}
+
+.panel-header span {
 	font-size: 14px;
 	font-weight: 600;
-	padding: 0 12px;
-	color: #007aff;
-	background-color: rgba(0, 122, 255, 0.1);
-	border-radius: 8px;
-	height: 36px;
+	color: var(--text-primary);
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Top Bar Content */
+.app-title {
+	font-size: 16px;
+	font-weight: 600;
+	color: var(--text-primary);
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.mode-display span {
+	background: var(--primary-light);
+	color: var(--primary-color);
+	padding: 4px 12px;
+	border-radius: var(--border-radius-small);
+	border: 1px solid var(--glass-border);
+	font-size: 14px;
+	font-weight: 500;
+	transition: all 0.3s ease;
+}
+
+/* =================================
+   TOOL BUTTONS
+   ================================= */
+.tool-btn {
+	width: 48px;
+	height: 48px;
+	background: var(--glass-bg-light);
+	border: 1px solid var(--glass-border);
+	border-radius: var(--border-radius-small);
+	color: var(--text-secondary);
+	cursor: pointer;
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+	position: relative;
+	overflow: hidden;
 }
 
-.tool-group {
+.tool-btn::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(135deg, var(--primary-light), transparent);
+	opacity: 0;
+	transition: opacity 0.2s ease;
+}
+
+.tool-btn:hover {
+	border-color: var(--primary-color);
+	color: var(--text-primary);
+	transform: translateY(-2px);
+	box-shadow: 0 4px 15px var(--primary-glow);
+}
+
+.tool-btn:hover::before {
+	opacity: 1;
+}
+
+.tool-btn.active {
+	background: var(--primary-color);
+	border-color: var(--primary-hover);
+	color: #ffffff;
+	transform: scale(1.05);
+	box-shadow: 0 0 20px var(--primary-glow);
+}
+
+/* =================================
+   LAYER ITEMS
+   ================================= */
+.layer-list {
 	display: flex;
-	align-items: center;
-	gap: 8px;
-	padding: 0 8px;
+	flex-direction: column;
+	gap: var(--spacing-sm);
 }
 
-#mode-selector {
-	background-color: rgba(255, 255, 255, 0.1);
-	border-radius: 8px;
-	padding: 4px;
-}
-
-.tool-button {
-	background: transparent;
-	border: none;
-	padding: 8px;
-	border-radius: 6px;
-	cursor: pointer;
-	color: #f0f0f0;
-	transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-.tool-button:hover {
-	background-color: rgba(255, 255, 255, 0.2);
-}
-
-.tool-button.active {
-	background-color: #007aff; /* A bright color to indicate active state */
-	color: white;
-}
-
-.tool-button-confirm {
-	background-color: #34c759; /* Green for confirmation */
-	color: white;
-	padding: 8px 16px;
-	border: none;
-	border-radius: 6px;
-	cursor: pointer;
-	font-weight: 600;
-	transition: background-color 0.2s ease;
-}
-
-.tool-button-confirm:hover {
-	background-color: #2fb350;
-}
-
-.tool-button-cancel {
-	background-color: #555; /* Neutral gray */
-	color: white;
-	padding: 8px 16px;
-	border: none;
-	border-radius: 6px;
-	cursor: pointer;
-	font-weight: 600;
-	transition: background-color 0.2s ease;
-}
-
-.tool-button-cancel:hover {
-	background-color: #666;
-}
-
-.control-item {
+.layer-item {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	gap: 4px;
+	padding: var(--spacing-sm);
+	border: 1px solid var(--glass-border);
+	border-radius: var(--border-radius-small);
+	background: var(--glass-bg-light);
+	cursor: pointer;
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+	position: relative;
+	overflow: hidden;
 }
 
-.control-item label {
-	font-size: 12px;
+.layer-item::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(135deg, var(--primary-light), transparent);
+	opacity: 0;
+	transition: opacity 0.2s ease;
+}
+
+.layer-item:hover {
+	border-color: var(--primary-color);
+	transform: translateY(-2px);
+	box-shadow: 0 4px 15px var(--primary-glow);
+}
+
+.layer-item:hover::before,
+.layer-item.active::before {
+	opacity: 1;
+}
+
+.layer-item.active {
+	border-color: var(--primary-color);
+	background: var(--primary-light);
+	box-shadow: 0 0 15px var(--primary-glow);
+}
+
+.layer-icon {
+	font-size: 20px;
+	margin-bottom: 4px;
+	position: relative;
+	z-index: 1;
+}
+
+.layer-name {
+	font-size: 10px;
 	font-weight: 500;
-	color: #a0a0a0;
+	color: var(--text-secondary);
+	text-align: center;
+	position: relative;
+	z-index: 1;
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-.control-item input[type="range"] {
-	width: 120px;
-	margin: 0;
+.layer-item.active .layer-name {
+	color: var(--text-primary);
 }
 
-.control-item input[type="color"] {
-	width: 32px;
-	height: 32px;
-	border: none;
-	padding: 0;
-	border-radius: 6px;
-	background-color: transparent;
+/* =================================
+   BRUSH CONTROLS
+   ================================= */
+.control-group {
+	margin-bottom: var(--spacing-md);
 }
 
-/* Sticker Drawer and Preview Styling */
-#sticker-drawer {
-	position: fixed;
-	right: -160px; /* Start off-screen */
-	top: 0;
-	width: 120px;
-	height: 100%;
-	background: rgba(45, 45, 45, 0.95);
-	backdrop-filter: blur(10px);
-	box-shadow: -4px 0 15px rgba(0, 0, 0, 0.2);
-	transition: right 0.3s ease-in-out;
-	z-index: 100;
-	color: #f0f0f0;
-	padding: 20px;
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
-		Arial, sans-serif;
-	border-left: 1px solid rgba(255, 255, 255, 0.1);
+.control-group label {
+	display: block;
+	margin-bottom: var(--spacing-sm);
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--text-secondary);
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-#sticker-drawer.open {
-	right: 0; /* Slide in */
+/* Input Styling */
+input[type="range"] {
+	width: 100%;
+	height: 6px;
+	background: var(--glass-bg-light);
+	border-radius: 3px;
+	outline: none;
+	border: 1px solid var(--glass-border);
 }
 
-#sticker-list {
+input[type="range"]::-webkit-slider-thumb {
+	appearance: none;
+	width: 18px;
+	height: 18px;
+	background: var(--primary-color);
+	border-radius: 50%;
+	cursor: pointer;
+	box-shadow: 0 2px 8px var(--primary-glow);
+	transition: all 0.2s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+	background: var(--primary-hover);
+	transform: scale(1.1);
+}
+
+input[type="color"] {
+	width: 100%;
+	height: 40px;
+	border: 1px solid var(--glass-border);
+	border-radius: var(--border-radius-small);
+	background: var(--glass-bg-light);
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+input[type="color"]:hover {
+	border-color: var(--primary-color);
+	box-shadow: 0 0 10px var(--primary-glow);
+}
+
+/* =================================
+   STICKER GRID
+   ================================= */
+.sticker-grid {
 	display: grid;
-	grid-template-columns: 1fr;
-	gap: 10px;
+	grid-template-columns: repeat(3, 1fr);
+	gap: var(--spacing-sm);
+	max-height: 200px;
 	overflow-y: auto;
-	height: calc(100% - 60px);
-	padding-right: 10px; /* Add some padding for the scrollbar */
+	scrollbar-width: thin;
+	scrollbar-color: var(--primary-color) var(--glass-bg-light);
+}
+
+.sticker-grid::-webkit-scrollbar {
+	width: 6px;
+}
+
+.sticker-grid::-webkit-scrollbar-track {
+	background: var(--glass-bg-light);
+	border-radius: 3px;
+}
+
+.sticker-grid::-webkit-scrollbar-thumb {
+	background: var(--primary-color);
+	border-radius: 3px;
 }
 
 .sticker-item {
-	width: 100%;
-	aspect-ratio: 1 / 1;
-	background-color: rgba(255, 255, 255, 0.1);
-	border-radius: 8px;
-	cursor: pointer;
-	transition: transform 0.2s ease, box-shadow 0.2s ease;
-	background-size: contain;
-	background-repeat: no-repeat;
+	width: 60px;
+	height: 60px;
+	background-size: cover;
 	background-position: center;
-	border: 1px solid transparent;
+	border: 2px solid var(--glass-border);
+	border-radius: var(--border-radius-small);
+	cursor: pointer;
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+	position: relative;
+	overflow: hidden;
+}
+
+.sticker-item::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(135deg, var(--primary-light), transparent);
+	opacity: 0;
+	transition: opacity 0.2s ease;
 }
 
 .sticker-item:hover {
+	border-color: var(--primary-color);
 	transform: scale(1.05);
+	box-shadow: 0 4px 15px var(--primary-glow);
+}
+
+.sticker-item:hover::before,
+.sticker-item.selected::before {
+	opacity: 1;
 }
 
 .sticker-item.selected {
-	box-shadow: 0 0 0 3px #007aff;
-	border-color: #007aff;
+	border-color: var(--primary-color);
+	box-shadow: 0 0 15px var(--primary-glow);
+	transform: scale(1.1);
 }
 
-#sticker-tray .sticker-item {
-	min-width: 60px; /* Give stickers a fixed size in the tray */
+/* =================================
+   COLOR HISTORY
+   ================================= */
+.color-history {
+	margin-top: var(--spacing-md);
+	padding: 8px;
+	background: rgba(255, 255, 255, 0.05);
+	border-radius: 6px;
+	border: 1px solid var(--glass-border);
+}
+
+.color-history-header {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--text-secondary);
+	margin-bottom: var(--spacing-sm);
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.color-history-grid {
+	display: grid;
+	grid-template-columns: repeat(6, 1fr);
+	gap: 6px;
+}
+
+.color-history-item {
+	width: 24px;
+	height: 24px;
+	border-radius: var(--border-radius-small);
+	border: 1px solid var(--glass-border);
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.color-history-item:hover {
+	transform: scale(1.1);
+	border-color: var(--primary-color);
+	box-shadow: 0 0 10px var(--primary-glow);
+}
+
+/* =================================
+   BRUSH INDICATORS
+   ================================= */
+#brush2dIndicator,
+#eraser2dIndicator {
+	position: fixed;
+	border-radius: 50%;
+	pointer-events: none;
+	z-index: 50;
+	display: none;
+	transform: translate3d(0, 0, 0);
+	will-change: transform, width, height;
+	transition: width 0.1s ease-out, height 0.1s ease-out;
+}
+
+#brush2dIndicator {
+	border: 2px solid #ff0000;
+	background: rgba(255, 0, 0, 0.05);
+}
+
+#eraser2dIndicator {
+	border: 2px dashed #ff6b6b;
+	background: rgba(255, 107, 107, 0.1);
+	box-shadow: 0 0 15px rgba(255, 107, 107, 0.3);
+}
+
+/* Brush inner elements - properly styled */
+.brush-inner-ring {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 30%;
+	height: 30%;
+	border: 1px solid rgba(255, 255, 255, 0.5);
+	border-radius: 50%;
+	animation: innerRingSpin 6s linear infinite;
+}
+
+@keyframes innerRingSpin {
+	from {
+		transform: translate(-50%, -50%) rotate(0deg);
+	}
+	to {
+		transform: translate(-50%, -50%) rotate(360deg);
+	}
+}
+
+/* Brush opacity indicator - properly styled */
+.brush-opacity-indicator {
+	position: absolute;
+	top: -12px;
+	right: -12px;
+	width: 20px;
+	height: 20px;
+	background: var(--glass-bg);
+	backdrop-filter: var(--glass-blur);
+	-webkit-backdrop-filter: var(--glass-blur);
+	border: 1px solid var(--glass-border);
+	border-radius: 50%;
+	font-size: 9px;
+	font-weight: 600;
+	color: var(--text-primary);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: var(--glass-shadow);
+	transform: translate3d(0, 0, 0);
+	transition: all 0.1s ease;
+}
+
+/* Eraser inner cross - properly styled */
+.eraser-inner-cross {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 60%;
+	height: 60%;
+}
+
+.eraser-inner-cross::before,
+.eraser-inner-cross::after {
+	content: "";
+	position: absolute;
+	background: rgba(255, 107, 107, 0.8);
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	box-shadow: 0 0 4px rgba(255, 107, 107, 0.5);
+}
+
+.eraser-inner-cross::before {
+	width: 100%;
+	height: 2px;
+}
+
+.eraser-inner-cross::after {
+	width: 2px;
+	height: 100%;
+}
+
+/* Eraser size indicator - properly styled */
+.eraser-size-indicator {
+	position: absolute;
+	top: -12px;
+	right: -12px;
+	width: 20px;
+	height: 20px;
+	background: var(--glass-bg);
+	backdrop-filter: var(--glass-blur);
+	-webkit-backdrop-filter: var(--glass-blur);
+	border: 1px solid rgba(255, 107, 107, 0.5);
+	border-radius: 50%;
+	font-size: 9px;
+	font-weight: 600;
+	color: #ff6b6b;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: var(--glass-shadow);
+	transform: translate3d(0, 0, 0);
+	transition: all 0.1s ease;
+}
+
+/* Hide indicators in paint mode if user prefers cleaner experience */
+body[data-mode="paint"] .brush-opacity-indicator,
+body[data-mode="eraser"] .eraser-size-indicator {
+	/* Comment out the line below to show size/opacity indicators */
+	display: none;
+}
+
+/* Alternative: Show only on hover/active painting */
+body[data-mode="paint"]:hover .brush-opacity-indicator,
+body[data-mode="eraser"]:hover .eraser-size-indicator {
+	/* Uncomment to show indicators only during interaction */
+	/* display: flex; */
+}
+
+/* Clear canvas functionality removed - UI decluttered */
+
+/* =================================
+   MODE-SPECIFIC VISIBILITY
+   ================================= */
+body[data-mode="paint"] .floating-brush-panel,
+body[data-mode="paint"] .floating-minimap {
+	display: block;
+}
+
+body[data-mode="sticker"] .floating-sticker-panel,
+body[data-mode="sticker"] .floating-layers-panel {
+	display: block;
+}
+
+body[data-mode="eraser"] .floating-brush-panel {
+	display: block;
+	border-color: rgba(255, 107, 107, 0.4);
+}
+
+body[data-mode="eraser"] .floating-brush-panel .panel-header {
+	border-bottom-color: rgba(255, 107, 107, 0.3);
+}
+
+body[data-mode="eraser"] .floating-brush-panel .panel-header span {
+	color: #ff6b6b;
+}
+
+/* Hide color controls in eraser mode */
+body[data-mode="eraser"] input[type="color"],
+body[data-mode="eraser"] .color-history {
+	display: none !important;
+}
+
+/* Hide entire color control group in eraser mode */
+body[data-mode="eraser"] .control-group:first-child {
+	display: none !important;
+}
+
+/* Sticker grid styling moved to unified section above */
+
+.sticker-item {
+	width: 60px;
 	height: 60px;
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+	border: 2px solid var(--glass-border);
+	border-radius: var(--border-radius-small);
+	cursor: pointer;
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+	position: relative;
+	overflow: hidden;
 }
 
+.sticker-item::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(135deg, var(--primary-light), transparent);
+	opacity: 0;
+	transition: opacity 0.2s ease;
+}
+
+.sticker-item:hover {
+	border-color: var(--primary-color);
+	transform: translateY(-2px);
+	box-shadow: 0 4px 15px var(--primary-glow);
+}
+
+.sticker-item:hover::before {
+	opacity: 1;
+}
+
+.sticker-item.selected {
+	border-color: var(--primary-color);
+	box-shadow: 0 0 15px var(--primary-glow);
+	transform: scale(1.05);
+}
+
+.sticker-item.selected::before {
+	opacity: 0.5;
+}
+
+/* =================================
+   STICKER PREVIEW CURSOR
+   ================================= */
 #sticker-preview {
 	position: fixed;
 	pointer-events: none;
-	z-index: 110;
+	z-index: 50;
 	display: none;
+	transform: translate3d(0, 0, 0);
+	will-change: transform, width, height;
+	transition: width 0.1s ease-out, height 0.1s ease-out;
+	border: 2px dashed var(--primary-color);
+	border-radius: var(--border-radius-small);
 	background-size: contain;
-	background-repeat: no-repeat;
 	background-position: center;
-	opacity: 0.7;
+	background-repeat: no-repeat;
+	box-shadow: 0 0 15px var(--primary-glow);
+	/* Semi-transparent background for better visibility */
+	backdrop-filter: blur(2px);
+	-webkit-backdrop-filter: blur(2px);
 }
 
-/* Mobile Responsiveness */
+/* Add a subtle overlay to make the preview more visible */
+#sticker-preview::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: rgba(0, 120, 212, 0.1);
+	border-radius: inherit;
+	z-index: -1;
+}
+
+/* Add a small corner indicator to show it's a preview */
+#sticker-preview::after {
+	content: "🏷️";
+	position: absolute;
+	top: -8px;
+	right: -8px;
+	width: 16px;
+	height: 16px;
+	background: var(--primary-color);
+	border-radius: 50%;
+	font-size: 8px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* =================================
+   TOOL STATUS DISPLAY
+   ================================= */
+.tool-status-viewport {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	padding: 12px 24px;
+	background: rgba(0, 0, 0, 0.8);
+	color: white;
+	border-radius: 25px;
+	font-size: 16px;
+	font-weight: 500;
+	z-index: 1000;
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.3s ease, transform 0.3s ease;
+	white-space: nowrap;
+	box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+	text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+	max-width: 90vw; /* Ensure it doesn't exceed viewport width */
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.tool-status-viewport.show {
+	opacity: 1;
+	transform: translate(-50%, -60%);
+	animation: statusPulse 1.5s infinite;
+}
+
+/* =================================
+   KEYFRAME ANIMATIONS
+   ================================= */
+
+@keyframes statusPulse {
+	0% {
+		transform: translate(-50%, -60%) scale(1);
+	}
+	50% {
+		transform: translate(-50%, -60%) scale(1.05);
+	}
+	100% {
+		transform: translate(-50%, -60%) scale(1);
+	}
+}
+
+@keyframes tooltipShow {
+	from {
+		opacity: 0;
+		transform: translateY(5px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* =================================
+   RECORD MODE - CLEAN UI
+   ================================= */
+
+/* Hide all UI panels when in record mode */
+body[data-mode="record"] .floating-toolbar,
+body[data-mode="record"] .floating-layers-panel,
+body[data-mode="record"] .floating-brush-panel,
+body[data-mode="record"] .floating-sticker-panel,
+body[data-mode="record"] .floating-minimap,
+body[data-mode="record"] .undo-redo-panel,
+body[data-mode="record"] .notification {
+	display: none !important;
+}
+
+/* Simplify top bar in record mode - only show title and record controls */
+body[data-mode="record"] .floating-top-bar {
+	background: var(--glass-bg);
+	border: 1px solid rgba(220, 53, 69, 0.3);
+	box-shadow: var(--glass-shadow), 0 0 20px rgba(220, 53, 69, 0.2);
+}
+
+/* Hide mode display when in record mode since the controls show the state */
+body[data-mode="record"] .mode-display {
+	display: none;
+}
+
+/* =================================
+   RECORD SECTION STYLING
+   ================================= */
+
+/* Record Section Layout */
+.record-section {
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-md);
+}
+
+/* Record Button - Match glassmorphism design */
+.record-button {
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-sm);
+	padding: 4px 12px;
+	background: var(--glass-bg-light);
+	backdrop-filter: var(--glass-blur);
+	-webkit-backdrop-filter: var(--glass-blur);
+	border: 1px solid var(--glass-border);
+	border-radius: var(--border-radius-small);
+	color: var(--text-primary);
+	font-size: 14px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	position: relative;
+	overflow: hidden;
+}
+
+.record-button::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(135deg, rgba(220, 53, 69, 0.15), transparent);
+	opacity: 0;
+	transition: opacity 0.2s ease;
+}
+
+.record-button:hover {
+	border-color: rgba(220, 53, 69, 0.4);
+	color: #ff6b6b;
+	transform: translateY(-1px);
+	box-shadow: 0 4px 15px rgba(220, 53, 69, 0.2);
+}
+
+.record-button:hover::before {
+	opacity: 1;
+}
+
+.record-button svg {
+	width: 16px;
+	height: 16px;
+	transition: all 0.2s ease;
+}
+
+/* Active record mode styling */
+body[data-mode="record"] .record-button {
+	background: rgba(220, 53, 69, 0.15);
+	border-color: rgba(220, 53, 69, 0.4);
+	color: #ff6b6b;
+	animation: recordPulse 2s infinite;
+}
+
+body[data-mode="record"] .record-button::before {
+	opacity: 1;
+}
+
+@keyframes recordPulse {
+	0%,
+	100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+	50% {
+		opacity: 0.9;
+		transform: scale(1.02);
+	}
+}
+
+/* Record Controls - Match glassmorphism design */
+.record-controls {
+	display: none;
+	gap: var(--spacing-sm);
+	align-items: center;
+}
+
+body[data-mode="record"] .record-controls {
+	display: flex;
+}
+
+.btn-confirm,
+.btn-cancel {
+	padding: 4px 16px;
+	border: 1px solid var(--glass-border);
+	border-radius: var(--border-radius-small);
+	background: var(--glass-bg-light);
+	backdrop-filter: var(--glass-blur);
+	-webkit-backdrop-filter: var(--glass-blur);
+	font-size: 14px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+	position: relative;
+	overflow: hidden;
+}
+
+.btn-confirm::before,
+.btn-cancel::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	opacity: 0;
+	transition: opacity 0.2s ease;
+}
+
+.btn-confirm {
+	color: #28a745;
+	border-color: rgba(40, 167, 69, 0.3);
+}
+
+.btn-confirm::before {
+	background: linear-gradient(135deg, rgba(40, 167, 69, 0.15), transparent);
+}
+
+.btn-confirm:hover {
+	border-color: rgba(40, 167, 69, 0.5);
+	color: #218838;
+	transform: translateY(-1px);
+	box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
+}
+
+.btn-confirm:hover::before {
+	opacity: 1;
+}
+
+.btn-cancel {
+	color: var(--text-secondary);
+	border-color: var(--glass-border);
+}
+
+.btn-cancel::before {
+	background: linear-gradient(135deg, rgba(108, 117, 125, 0.15), transparent);
+}
+
+.btn-cancel:hover {
+	border-color: rgba(108, 117, 125, 0.4);
+	color: var(--text-primary);
+	transform: translateY(-1px);
+	box-shadow: 0 4px 15px rgba(108, 117, 125, 0.2);
+}
+
+.btn-cancel:hover::before {
+	opacity: 1;
+}
+
+/* Recording indicator - show during actual recording */
+.recording-indicator {
+	display: none;
+	position: fixed;
+	top: calc(var(--spacing-lg) + 80px);
+	left: 50%;
+	transform: translateX(-50%);
+	background: rgba(255, 71, 87, 0.95);
+	color: white;
+	padding: var(--spacing-sm) var(--spacing-lg);
+	border-radius: var(--border-radius);
+	font-size: 14px;
+	font-weight: 600;
+	z-index: 1000;
+	box-shadow: var(--glass-shadow);
+	animation: recordingBounce 1s ease-in-out infinite alternate;
+}
+
+@keyframes recordingBounce {
+	from {
+		transform: translateX(-50%) scale(1);
+	}
+	to {
+		transform: translateX(-50%) scale(1.05);
+	}
+}
+
+/* Clean viewport during recording */
+body[data-mode="record"] .viewport-container {
+	background: #1a1a1a;
+}
+
+/* Hide cursors during record mode */
+body[data-mode="record"] #brush2dIndicator,
+body[data-mode="record"] #eraser2dIndicator,
+body[data-mode="record"] #sticker-preview {
+	display: none !important;
+}
+
+/* =================================
+   UNDO/REDO PANEL - UNIFIED DESIGN
+   ================================= */
+.undo-redo-panel {
+	position: fixed;
+	top: var(--spacing-lg);
+	right: var(--spacing-lg);
+	display: flex;
+	gap: var(--spacing-sm);
+	background: var(--glass-bg);
+	backdrop-filter: var(--glass-blur);
+	-webkit-backdrop-filter: var(--glass-blur);
+	border: 1px solid var(--glass-border);
+	border-radius: var(--border-radius);
+	padding: var(--spacing-sm);
+	box-shadow: var(--glass-shadow);
+	z-index: 100;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.undo-redo-panel:hover {
+	border-color: var(--glass-border-hover);
+	box-shadow: var(--glass-shadow), 0 0 20px var(--primary-glow);
+}
+
+.undo-btn,
+.redo-btn {
+	width: 40px;
+	height: 40px;
+	background: var(--glass-bg-light);
+	border: 1px solid var(--glass-border);
+	border-radius: var(--border-radius-small);
+	color: var(--text-secondary);
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 16px;
+	font-weight: 600;
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+	position: relative;
+	overflow: hidden;
+}
+
+.undo-btn::before,
+.redo-btn::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(135deg, var(--primary-light), transparent);
+	opacity: 0;
+	transition: opacity 0.2s ease;
+}
+
+.undo-btn:hover,
+.redo-btn:hover {
+	border-color: var(--primary-color);
+	color: var(--text-primary);
+	transform: translateY(-2px);
+	box-shadow: 0 4px 15px var(--primary-glow);
+}
+
+.undo-btn:hover::before,
+.redo-btn:hover::before {
+	opacity: 1;
+}
+
+.undo-btn:disabled,
+.redo-btn:disabled {
+	opacity: 0.4;
+	cursor: not-allowed;
+	color: var(--text-tertiary);
+}
+
+.undo-btn:disabled:hover,
+.redo-btn:disabled:hover {
+	transform: none;
+	border-color: var(--glass-border);
+	box-shadow: none;
+}
+
+.undo-btn:disabled::before,
+.redo-btn:disabled::before {
+	opacity: 0;
+}
+
+/* =================================
+   MOBILE RESPONSIVE DESIGN - COMPREHENSIVE
+   ================================= */
 @media (max-width: 768px) {
-	#toolbar {
-		flex-direction: column;
-		gap: 10px;
-		padding: 10px;
-		bottom: 0;
+	/* Reduce spacing for smaller screens */
+	:root {
+		--spacing-sm: 6px;
+		--spacing-md: 12px;
+		--spacing-lg: 16px;
+		--border-radius: 10px;
+		--border-radius-small: 6px;
+	}
+
+	/* Ensure viewport is properly sized */
+	.viewport-container {
+		width: 100vw;
+		height: 100vh;
+		height: 100svh; /* Use safe viewport height on mobile */
+	}
+
+	/* Restructured mobile top bar - two row layout */
+	.floating-top-bar {
+		position: fixed;
+		top: 0;
 		left: 0;
-		transform: none;
-		width: 100%;
-		border-radius: 0;
-	}
-
-	.tool-group {
-		flex-direction: row;
-		justify-content: center;
-	}
-
-	.tool-button {
-		padding: 12px;
-	}
-
-	.control-item input[type="range"] {
-		width: 80%;
-	}
-
-	#sticker-drawer {
-		width: 100%;
-		height: auto;
-		top: auto;
-		bottom: -100%;
 		right: 0;
-		transition: bottom 0.3s ease-in-out;
+		width: 100%;
+		transform: translateY(0);
+		padding: 8px 12px;
+		border-radius: 0 0 16px 16px;
+		justify-content: space-between;
+		background: rgba(5, 5, 5, 0.95);
+		backdrop-filter: blur(20px);
+		z-index: 100;
+		display: flex !important;
+		flex-direction: column; /* Stack rows vertically */
+		gap: 6px;
 	}
 
-	#sticker-drawer.open {
+	/* First row: App title, mode, and record */
+	.top-bar-row-1 {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		width: 100%;
+	}
+
+	/* Second row: Layers (center) and undo/redo (right) */
+	.top-bar-row-2 {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		width: 100%;
+		min-height: 40px;
+	}
+
+	.app-title {
+		font-size: 14px;
+		font-weight: 600;
+	}
+
+	.mode-display span {
+		font-size: 11px;
+		padding: 3px 8px;
+		white-space: nowrap;
+	}
+
+	.record-section {
+		gap: 4px;
+	}
+
+	.record-button {
+		padding: 4px 8px;
+		font-size: 10px;
+	}
+
+	/* Compact bottom toolbar */
+	.floating-toolbar {
+		position: fixed;
+		left: 0;
+		right: 0;
 		bottom: 0;
+		top: auto;
+		transform: none;
+		flex-direction: row;
+		justify-content: space-around;
+		align-items: center;
+		width: 100%;
+		padding: 8px;
+		border-radius: 16px 16px 0 0;
+		background: rgba(5, 5, 5, 0.95);
+		backdrop-filter: blur(20px);
+		border-top: 1px solid var(--glass-border);
+		border-left: none;
+		border-right: none;
+		border-bottom: none;
+		z-index: 100;
+		display: flex !important;
+		box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+		height: 70px; /* Fixed height */
+	}
+
+	.tool-btn {
+		width: 48px;
+		height: 48px;
+		flex: 1;
+		max-width: 60px;
+		margin: 0 1px;
+		font-size: 14px;
+	}
+
+	.tool-btn svg {
+		width: 18px;
+		height: 18px;
+	}
+
+	/* Mobile: Position layers panel in top bar area */
+	.floating-layers-panel {
+		position: absolute;
+		top: 100%; /* Below the top bar */
+		left: 50%;
+		transform: translateX(-50%);
+		background: transparent;
+		border: none;
+		padding: 0;
+		margin: 8px auto 0;
+		opacity: 1;
+		pointer-events: auto;
+		z-index: auto;
+		width: auto;
+	}
+
+	/* Show layers in paint, eraser, and sticker modes - now in top bar */
+	body[data-mode="paint"] .floating-layers-panel,
+	body[data-mode="eraser"] .floating-layers-panel,
+	body[data-mode="sticker"] .floating-layers-panel {
+		display: block !important;
+	}
+
+	/* Hide layers panel in rotate mode */
+	body[data-mode="rotate"] .floating-layers-panel {
+		display: none !important;
+	}
+
+	/* Layers panel positioned responsively via media queries below */
+
+	.layer-list {
+		flex-direction: row;
+		gap: 6px;
+		align-items: center;
+	}
+
+	.layer-item {
+		width: 36px;
+		height: 36px;
+		padding: 4px;
+		border-radius: 8px;
+	}
+
+	.layer-icon {
+		font-size: 16px;
+		margin-bottom: 0;
+	}
+
+	.layer-name {
+		display: none;
+	}
+
+	/* Compact slide-up panels - smaller and more efficient */
+	.floating-brush-panel,
+	.floating-sticker-panel {
+		position: fixed;
+		left: 0;
 		right: 0;
+		bottom: 0;
+		width: 100%;
+		border-radius: 16px 16px 0 0;
+		transform: translateY(100%); /* Closed by default */
+		transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		padding: 12px;
+		padding-bottom: 80px; /* Space for toolbar */
+		background: rgba(10, 10, 10, 0.95);
+		backdrop-filter: blur(20px);
+		z-index: 95;
+		max-height: 50vh; /* Reduced height */
+		overflow-y: auto;
+		box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.6);
+		display: none; /* Hidden by default */
 	}
 
-	#sticker-list {
-		grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+	/* Show panels only when mode is active AND not collapsed */
+	body[data-mode="paint"] .floating-brush-panel:not(.panel-closed),
+	body[data-mode="sticker"] .floating-sticker-panel:not(.panel-closed),
+	body[data-mode="eraser"] .floating-brush-panel:not(.panel-closed) {
+		transform: translateY(0);
+		display: block !important;
+	}
+
+	/* Collapsed state - completely hidden */
+	.floating-brush-panel.panel-closed,
+	.floating-sticker-panel.panel-closed {
+		transform: translateY(100%);
+		display: none !important;
+	}
+
+	/* Panel toggle button - only visible when panel is open */
+	.panel-toggle-btn {
+		position: absolute;
+		top: 8px;
+		right: 12px;
+		width: 32px;
+		height: 32px;
+		background: rgba(220, 53, 69, 0.8);
+		border: 1px solid var(--glass-border);
+		border-radius: 50%;
+		color: white;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 14px;
+		font-weight: bold;
+		transition: all 0.3s ease;
+		z-index: 10;
+	}
+
+	.panel-toggle-btn:hover {
+		background: rgba(220, 53, 69, 1);
+		transform: scale(1.1);
+	}
+
+	/* Floating toggle buttons - only show when panels are closed */
+	.floating-panel-toggle {
+		position: fixed;
+		bottom: 90px;
+		right: 16px; /* Back to right side for cleaner layout */
+		width: 50px;
+		height: 50px;
+		background: rgba(0, 120, 212, 0.9);
+		border: 1px solid var(--glass-border);
+		border-radius: 50%;
+		color: white;
+		cursor: pointer;
+		display: none;
+		align-items: center;
+		justify-content: center;
+		font-size: 18px; /* Slightly larger for better visibility */
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+		transition: all 0.3s ease;
+		z-index: 96;
+	}
+
+	.floating-panel-toggle:hover {
+		transform: scale(1.1);
+		background: rgba(0, 120, 212, 1);
+	}
+
+	/* Show floating toggle only when in relevant mode AND panel is closed */
+	body[data-mode="paint"] .floating-panel-toggle.paint-toggle,
+	body[data-mode="eraser"] .floating-panel-toggle.paint-toggle {
+		display: flex;
+	}
+
+	body[data-mode="sticker"] .floating-panel-toggle.sticker-toggle {
+		display: flex;
+	}
+
+	/* Hide floating toggles when panels are open */
+	body[data-mode="paint"]
+		.floating-brush-panel:not(.panel-closed)
+		~ .floating-panel-toggle.paint-toggle,
+	body[data-mode="eraser"]
+		.floating-brush-panel:not(.panel-closed)
+		~ .floating-panel-toggle.paint-toggle,
+	body[data-mode="sticker"]
+		.floating-sticker-panel:not(.panel-closed)
+		~ .floating-panel-toggle.sticker-toggle {
+		display: none !important;
+	}
+
+	/* Hide collapsed panel features since we're using completely closed panels */
+	.floating-brush-panel.collapsed,
+	.floating-sticker-panel.collapsed,
+	.panel-mini-controls,
+	.panel-header.collapsed {
+		display: none;
+	}
+
+	/* Auto-hide panels after 5 seconds of inactivity */
+	.floating-brush-panel.auto-hidden,
+	.floating-sticker-panel.auto-hidden {
+		transform: translateY(100%);
+		display: none !important;
+	}
+
+	/* Compact brush controls */
+	.control-group {
+		margin-bottom: 12px;
+	}
+
+	.control-group label {
+		font-size: 12px;
+		margin-bottom: 4px;
+	}
+
+	input[type="range"] {
+		height: 6px;
+		margin: 6px 0;
+	}
+
+	input[type="range"]::-webkit-slider-thumb {
+		width: 18px;
+		height: 18px;
+	}
+
+	input[type="color"] {
+		height: 40px;
+		border-radius: 8px;
+	}
+
+	/* Mobile: Compact sticker grid */
+	.sticker-grid {
+		grid-template-columns: repeat(5, 1fr);
+		gap: 8px;
+		padding: 4px;
+	}
+
+	.sticker-item {
+		width: 50px;
+		height: 50px;
+		border-radius: 8px;
+	}
+
+	/* More compact color history */
+	.color-history {
+		margin-top: 8px;
+		padding: 6px;
+	}
+
+	.color-history-header {
+		font-size: 10px;
+		margin-bottom: 4px;
+	}
+
+	.color-history-grid {
+		grid-template-columns: repeat(6, 1fr);
+		gap: 4px;
+	}
+
+	.color-history-item {
+		width: 24px;
+		height: 24px;
+	}
+
+	/* Hide minimap and undo/redo by default - show only when needed */
+	.floating-minimap-panel,
+	.undo-redo-panel {
+		opacity: 0;
+		pointer-events: none;
+		transform: scale(0.8);
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	/* Show undo/redo only when there are actions */
+	.undo-redo-panel.has-actions {
+		position: static;
+		background: transparent;
+		border: none;
+		padding: 0;
+		gap: 6px;
+		opacity: 1;
+		pointer-events: auto;
+		transform: none;
+		display: flex;
+	}
+
+	.undo-btn,
+	.redo-btn {
+		width: 36px;
+		height: 36px;
+		font-size: 14px;
+		border-radius: 8px;
+	}
+
+	/* Show minimap only in paint mode and when panel is not visible */
+	body[data-mode="paint"] .floating-minimap-panel:not(.panel-visible) {
+		position: fixed;
+		bottom: 90px;
+		right: 12px;
+		width: 80px;
+		padding: 6px;
+		z-index: 80;
+		opacity: 1;
+		pointer-events: auto;
+		transform: scale(1);
+	}
+
+	#minimap-canvas {
+		width: 60px;
+		height: 60px;
+	}
+
+	/* Adjust recording indicator to avoid overlap */
+	.recording-indicator {
+		top: 100px; /* Below the two-row top bar */
+		font-size: 12px;
+		padding: 8px 14px;
+		z-index: 1000;
+	}
+
+	/* Tool status adjustments - higher position to avoid overlap */
+	.tool-status-viewport {
+		font-size: 14px; /* Larger for better readability */
+		padding: 10px 18px;
+		max-width: 75vw;
+		top: 35%; /* Adjust for taller top bar */
+		z-index: 999;
+	}
+
+	/* Notification adjustments - positioned to avoid overlap */
+	.notification {
+		top: 100px; /* Below the new two-row top bar */
+		right: 12px;
+		left: 12px;
+		max-width: calc(100vw - 24px);
+		font-size: 12px; /* Slightly larger for better readability */
+		padding: 10px 14px;
+		z-index: 998;
+	}
+
+	/* Remove hover effects completely on mobile */
+	.floating-top-bar:hover,
+	.floating-toolbar:hover,
+	.floating-layers-panel:hover,
+	.floating-brush-panel:hover,
+	.floating-sticker-panel:hover,
+	.floating-minimap:hover,
+	.floating-record-panel:hover {
+		transform: none;
+		box-shadow: inherit;
+	}
+
+	/* Touch-friendly sizing with better spacing */
+	button,
+	input,
+	.tool-btn,
+	.layer-item,
+	.sticker-item {
+		min-height: 44px;
+		min-width: 44px;
+	}
+
+	/* Prevent text zoom on iOS */
+	body {
+		font-size: 16px;
+		-webkit-text-size-adjust: 100%;
+	}
+
+	/* Remove top bar auto-hide styles since we're keeping it visible */
+	.floating-top-bar.auto-hidden,
+	.floating-top-bar.force-show {
+		transform: translateY(0) !important; /* Always visible */
+	}
+
+	.floating-top-bar {
+		transform: translateY(0) !important; /* Always keep top bar visible */
+	}
+
+	/* Hide mobile peek indicator since we removed the functionality */
+	.panel-peek {
+		display: none !important;
+	}
+
+	/* Ensure proper spacing between UI elements */
+	.floating-layers-panel,
+	.undo-redo-panel.has-actions {
+		margin-top: 8px; /* Add some breathing room */
+	}
+}
+
+/* Very small screens - even more compact */
+@media (max-width: 480px) {
+	.floating-top-bar {
+		padding: 6px 8px;
+	}
+
+	.app-title {
+		font-size: 11px;
+	}
+
+	.mode-display span {
+		font-size: 9px;
+		padding: 2px 4px;
+	}
+
+	.tool-btn {
+		width: 42px;
+		height: 42px;
+	}
+
+	.floating-brush-panel,
+	.floating-sticker-panel {
+		padding: 8px;
+		padding-bottom: 75px;
+		max-height: 45vh;
+	}
+
+	/* Sticker grid handled by desktop overrides below */
+
+	.sticker-item {
+		width: 45px;
+		height: 45px;
+	}
+
+	.control-group label {
+		font-size: 11px;
+	}
+}
+
+/* =================================
+   DESKTOP RESPONSIVE DESIGN - RESTORE PROPER LAYOUT
+   ================================= */
+@media (min-width: 769px) {
+	/* Ensure desktop UI is not affected by mobile changes */
+
+	/* Reset top bar to desktop positioning with proper spacing */
+	.floating-top-bar {
+		top: var(--spacing-lg);
+		left: var(--spacing-lg);
+		right: var(--spacing-lg);
+		transform: none;
+		width: auto; /* Auto width with left/right margins */
+		min-width: none;
+		padding: var(--spacing-sm) var(--spacing-lg);
+		border-radius: var(--border-radius); /* Restore border radius */
+		background: var(--glass-bg);
+		position: fixed;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		flex-direction: row !important;
+		border: 1px solid var(--glass-border); /* Restore full border */
+		white-space: nowrap;
+		z-index: 200;
+	}
+
+	.floating-top-bar:hover {
+		transform: translateY(-2px); /* Restore subtle hover effect */
+	}
+
+	/* Hide mobile-specific row structure on desktop */
+	.top-bar-row-1,
+	.top-bar-row-2 {
+		display: contents; /* Make them invisible containers */
+		flex-direction: row;
+		align-items: center;
+		gap: var(--spacing-lg);
+	}
+
+	/* Restructure top bar for left-center-right layout */
+	.top-bar-row-1 {
+		width: 100%;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	/* Left section: App title */
+	.app-title {
+		font-size: 16px;
+		font-weight: 600;
+		white-space: nowrap;
+		flex-shrink: 0;
+		order: 1;
+	}
+
+	/* Center section: Mode display */
+	.mode-display {
+		flex-shrink: 0;
+		order: 2;
+		position: absolute;
+		left: 50%;
+		transform: translateX(-50%);
+	}
+
+	.mode-display span {
+		font-size: 14px;
+		padding: 4px 12px;
+		white-space: nowrap;
+	}
+
+	/* Right section: Record button and undo/redo */
+	.record-section {
+		flex-shrink: 0;
+		white-space: nowrap;
+		order: 3;
+		display: flex;
+		align-items: center;
+		gap: var(--spacing-md);
+	}
+
+	/* Top bar undo/redo buttons */
+	.record-section .undo-btn,
+	.record-section .redo-btn {
+		width: 36px;
+		height: 36px;
+		background: var(--glass-bg-light);
+		border: 1px solid var(--glass-border);
+		border-radius: var(--border-radius-small);
+		color: var(--text-primary);
+		cursor: pointer;
+		font-size: 14px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.2s ease;
+	}
+
+	.record-section .undo-btn:hover,
+	.record-section .redo-btn:hover {
+		background: var(--glass-bg);
+		border-color: var(--primary-color);
+		transform: translateY(-1px);
+	}
+
+	.record-section .undo-btn:disabled,
+	.record-section .redo-btn:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	/* Hide second row on desktop since we're moving undo/redo to top bar */
+	.top-bar-row-2 {
+		display: none;
+	}
+
+	/* Ensure record button doesn't wrap */
+	.record-btn {
+		flex-shrink: 0;
+		white-space: nowrap;
+	}
+
+	/* Reset toolbar to desktop positioning */
+	.floating-toolbar {
+		position: fixed;
+		top: 50%;
+		left: var(--spacing-lg);
+		transform: translateY(-50%);
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-sm);
+		padding: var(--spacing-md);
+		width: auto;
 		height: auto;
+		border-radius: var(--border-radius);
+		background: var(--glass-bg);
+		border: 1px solid var(--glass-border);
 	}
 
-	canvas {
-		height: calc(100vh - 100px); /* Adjust for toolbar height */
+	.tool-btn {
+		width: 48px;
+		height: 48px;
+		flex: none;
+		max-width: none;
+		margin: 0;
+	}
+
+	.tool-btn svg {
+		width: 18px;
+		height: 18px;
+	}
+
+	/* Desktop: Reset layers panel to floating right side positioning */
+	.floating-layers-panel {
+		position: fixed !important;
+		top: 50% !important;
+		right: var(--spacing-lg) !important;
+		transform: translateY(-50%) !important;
+		width: 120px; /* Wider to accommodate icon + text layout */
+		padding: var(--spacing-md);
+		flex-direction: column;
+		gap: var(--spacing-sm);
+		background: var(--glass-bg);
+		border-radius: var(--border-radius);
+		opacity: 1;
+		pointer-events: auto;
+		margin: 0;
+		border: 1px solid var(--glass-border);
+		z-index: 100;
+		display: block !important;
+	}
+
+	/* Show layers panel in all modes except record on desktop */
+	body[data-mode="paint"] .floating-layers-panel,
+	body[data-mode="eraser"] .floating-layers-panel,
+	body[data-mode="sticker"] .floating-layers-panel,
+	body[data-mode="rotate"] .floating-layers-panel {
+		display: block !important;
+	}
+
+	/* Hide layers panel in record mode on desktop */
+	body[data-mode="record"] .floating-layers-panel {
+		display: none !important;
+	}
+
+	.layer-list {
+		flex-direction: column;
+		gap: var(--spacing-sm);
+	}
+
+	.layer-item {
+		width: auto;
+		height: auto;
+		padding: var(--spacing-sm);
+		border-radius: var(--border-radius-small);
+		display: flex; /* Use flexbox for horizontal layout */
+		align-items: center;
+		gap: 8px; /* Space between icon and text */
+		text-align: left; /* Left align text */
+	}
+
+	.layer-icon {
+		font-size: 16px; /* Slightly smaller icon */
+		margin-bottom: 0; /* Remove margin since we're using flex */
+		flex-shrink: 0; /* Don't shrink icon */
+	}
+
+	.layer-name {
+		font-size: 11px; /* Smaller text for compact layout */
+		text-align: left;
+		white-space: nowrap; /* Prevent text wrapping */
+		flex: 1; /* Take remaining space */
+	}
+
+	/* Restore control groups */
+	.control-group {
+		margin-bottom: var(--spacing-md);
+	}
+
+	.control-group label {
+		font-size: 13px;
+		margin-bottom: var(--spacing-sm);
+	}
+
+	input[type="range"] {
+		height: 6px;
+		margin: var(--spacing-sm) 0;
+	}
+
+	input[type="range"]::-webkit-slider-thumb {
+		width: 18px;
+		height: 18px;
+	}
+
+	input[type="color"] {
+		height: 40px;
+		border-radius: var(--border-radius-small);
+	}
+
+	/* Desktop: Force 3-column sticker grid */
+	.sticker-grid {
+		display: grid !important;
+		grid-template-columns: repeat(
+			3,
+			1fr
+		) !important; /* Force 3 columns on desktop */
+		gap: var(--spacing-sm) !important;
+		padding: 0 !important;
+		max-height: 200px !important;
+		overflow-y: auto !important;
+	}
+
+	.floating-sticker-panel .sticker-grid {
+		grid-template-columns: repeat(
+			3,
+			1fr
+		) !important; /* Extra specificity for 3 columns */
+	}
+
+	/* Ensure 3 columns with maximum specificity */
+	body .floating-sticker-panel .sticker-grid {
+		grid-template-columns: repeat(3, 1fr) !important;
+	}
+
+	/* Ultimate desktop sticker grid override - must be 3 columns */
+	html body .floating-sticker-panel .sticker-grid,
+	.floating-sticker-panel .sticker-grid {
+		grid-template-columns: repeat(3, 1fr) !important;
+		display: grid !important;
+	}
+
+	/* FINAL OVERRIDE: Force 3 columns with absolute maximum specificity */
+	@media screen and (min-width: 769px) {
+		html body div.floating-sticker-panel div.sticker-grid {
+			grid-template-columns: repeat(3, 1fr) !important;
+		}
+	}
+
+	.sticker-item {
+		width: 60px;
+		height: 60px;
+		border-radius: var(--border-radius-small);
+	}
+
+	/* Restore color history */
+	.color-history {
+		margin-top: var(--spacing-md);
+		padding: 8px;
+	}
+
+	.color-history-header {
+		font-size: 12px;
+		margin-bottom: var(--spacing-sm);
+	}
+
+	.color-history-grid {
+		grid-template-columns: repeat(6, 1fr);
+		gap: 6px;
+	}
+
+	.color-history-item {
+		width: 24px;
+		height: 24px;
+	}
+
+	/* Hide the old floating undo/redo panel on desktop */
+	.undo-redo-panel {
+		display: none !important;
+	}
+
+	/* Restore minimap (adjust position since no undo/redo panel) */
+	.floating-minimap-panel {
+		position: fixed;
+		top: calc(var(--spacing-lg) + 60px); /* Below the top bar */
+		right: var(--spacing-lg);
+		width: 180px;
+		padding: var(--spacing-md);
+		opacity: 1;
+		pointer-events: auto;
+		transform: none;
+		background: var(--glass-bg);
+		border-radius: var(--border-radius);
+		border: 1px solid var(--glass-border);
+		z-index: 120;
+	}
+
+	#minimap-canvas {
+		width: 120px;
+		height: 120px;
+	}
+
+	/* Restore undo/redo panel */
+	.undo-redo-panel {
+		position: fixed;
+		top: calc(var(--spacing-lg) + 60px); /* Below the top bar */
+		right: var(--spacing-lg);
+		padding: var(--spacing-sm);
+		gap: var(--spacing-sm);
+		opacity: 1;
+		pointer-events: auto;
+		transform: none;
+		background: var(--glass-bg);
+		border-radius: var(--border-radius);
+		border: 1px solid var(--glass-border); /* Restore desktop styling */
+		display: flex;
+		align-items: center;
+		z-index: 150; /* Between top bar and panels */
+	}
+
+	.undo-btn,
+	.redo-btn {
+		width: 40px;
+		height: 40px;
+		font-size: 16px;
+	}
+
+	/* Disable mobile auto-hide features */
+	.floating-top-bar.auto-hidden,
+	.floating-brush-panel.auto-hidden,
+	.floating-sticker-panel.auto-hidden,
+	.floating-brush-panel.collapsed,
+	.floating-sticker-panel.collapsed {
+		transform: none;
+		max-height: none;
+		overflow: visible;
+	}
+
+	/* Reset notifications */
+	.notification {
+		top: calc(var(--spacing-lg) + 60px);
+		right: var(--spacing-lg);
+		left: auto;
+		max-width: 300px;
+		font-size: 14px;
+		padding: var(--spacing-md) var(--spacing-lg);
+	}
+
+	/* Tool status adjustments */
+	.tool-status-viewport {
+		font-size: 16px;
+		padding: 12px 24px;
+		max-width: 400px;
+	}
+
+	/* Recording indicator */
+	.recording-indicator {
+		top: calc(var(--spacing-lg) + 80px);
+		font-size: 14px;
+		padding: var(--spacing-sm) var(--spacing-lg);
+	}
+
+	/* Restore hover effects on desktop */
+	.floating-top-bar:hover,
+	.floating-toolbar:hover,
+	.floating-layers-panel:hover,
+	.floating-brush-panel:hover,
+	.floating-sticker-panel:hover,
+	.floating-minimap-panel:hover,
+	.floating-record-panel:hover {
+		border-color: var(--glass-border-hover);
+		box-shadow: var(--glass-shadow), 0 0 20px var(--primary-glow);
+	}
+
+	/* Hide mobile peek indicator */
+	.panel-peek {
+		display: none;
+	}
+
+	/* Move undo/redo to top bar second row */
+	.undo-redo-panel {
+		position: static; /* Remove fixed positioning */
+		background: transparent;
+		border: none;
+		padding: 0;
+		gap: 6px;
+		opacity: 1;
+		pointer-events: auto;
+		transform: none;
+		display: flex;
+		align-items: center;
+	}
+
+	/* Always show undo/redo in top bar (remove conditional visibility) */
+	.undo-redo-panel.has-actions {
+		position: fixed;
+		top: var(--spacing-lg);
+		right: var(--spacing-lg);
+		padding: var(--spacing-sm);
+		gap: var(--spacing-sm);
+		opacity: 1;
+		pointer-events: auto;
+		transform: none;
+		background: var(--glass-bg);
+		border-radius: var(--border-radius);
+		border: 1px solid var(--glass-border);
+		display: flex;
+	}
+
+	/* Reset brush/sticker panels to desktop positioning */
+	.floating-brush-panel,
+	.floating-sticker-panel {
+		position: fixed;
+		bottom: var(--spacing-lg);
+		left: var(--spacing-lg);
+		width: 280px;
+		padding: var(--spacing-lg);
+		border-radius: var(--border-radius);
+		transform: none;
+		background: var(--glass-bg);
+		max-height: none;
+		overflow: visible;
+		display: none; /* Hidden by default, shown by mode */
+		border: 1px solid var(--glass-border); /* Restore desktop border */
+		z-index: 200; /* Higher than layers panel */
+	}
+
+	/* Hide mobile-specific elements on desktop */
+	.panel-toggle-btn,
+	.panel-mini-controls,
+	.floating-panel-toggle {
+		display: none !important;
+	}
+
+	/* Show full panel content on desktop */
+	.floating-brush-panel .control-group,
+	.floating-sticker-panel .sticker-grid,
+	.floating-brush-panel .color-history,
+	.floating-sticker-panel .control-group {
+		display: block !important; /* Force display on desktop */
+	}
+
+	/* Hide color controls in eraser mode on desktop */
+	body[data-mode="eraser"] .floating-brush-panel .control-group:first-child,
+	body[data-mode="eraser"] .floating-brush-panel input[type="color"],
+	body[data-mode="eraser"] .floating-brush-panel .color-history {
+		display: none !important;
+	}
+
+	/* Reset panel headers */
+	.panel-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: var(--spacing-md);
+		padding-bottom: var(--spacing-sm);
+		border-bottom: 1px solid var(--glass-border);
+	}
+
+	.panel-header span {
+		font-size: 14px;
+		font-weight: 600;
 	}
 }

@@ -1,9 +1,18 @@
 import * as THREE from "three";
 import { FBXLoader } from "three/addons/loaders/FBXLoader.js";
-import { createPbrMaterial } from "./materialManager.js";
+import {
+	createCustomMaterial,
+	createMaskOverlayMaterial,
+} from "./materialManager.js";
 
 let model;
-let normalMap, metalnessMap, roughnessMap;
+let albedoMap,
+	normalMap,
+	metalnessMap,
+	roughnessMap,
+	headMaskMap,
+	jacketMaskMap;
+let maskOverlayMesh = null;
 
 // --- Dynamic Texture Painting Setup ---
 const canvasSize = 1024;
@@ -16,14 +25,12 @@ paintTexture.colorSpace = THREE.SRGBColorSpace;
 // --- End Dynamic Texture Painting Setup ---
 
 export function loadModel(scene, onModelLoaded) {
-	const characterTextureLoader = new THREE.TextureLoader();
+	const loadingManager = new THREE.LoadingManager();
+	const characterTextureLoader = new THREE.TextureLoader(loadingManager);
+	const fbxLoader = new FBXLoader(loadingManager);
 
-	const albedoMap = characterTextureLoader.load(
-		"./GLBandFBX_010725/char01_albedo.webp",
-		(texture) => {
-			paintCtx.drawImage(texture.image, 0, 0, canvasSize, canvasSize);
-			paintTexture.needsUpdate = true;
-		}
+	albedoMap = characterTextureLoader.load(
+		"./GLBandFBX_010725/char01_albedo.webp"
 	);
 	albedoMap.colorSpace = THREE.SRGBColorSpace;
 
@@ -36,10 +43,24 @@ export function loadModel(scene, onModelLoaded) {
 	roughnessMap = characterTextureLoader.load(
 		"./GLBandFBX_010725/char01_roughness.webp"
 	);
+	headMaskMap = characterTextureLoader.load(
+		"./GLBandFBX_010725/char01_mask_head.webp"
+	);
+	jacketMaskMap = characterTextureLoader.load(
+		"./GLBandFBX_010725/char01_mask_jacket.webp"
+	);
 
-	const loader = new FBXLoader();
-	loader.load("./GLBandFBX_010725/Char01_FBX.fbx", (object) => {
+	fbxLoader.load("./GLBandFBX_010725/Char01_FBX.fbx", (object) => {
 		model = object;
+	});
+
+	loadingManager.onLoad = () => {
+		// This fires only when all assets managed by the manager are loaded
+		// 1. Setup the paint canvas with the base texture
+		paintCtx.drawImage(albedoMap.image, 0, 0, canvasSize, canvasSize);
+		paintTexture.needsUpdate = true;
+
+		// 2. Configure and add the model to the scene
 		model.scale.setScalar(0.01);
 		model.position.set(0, 0, 0);
 
@@ -47,20 +68,64 @@ export function loadModel(scene, onModelLoaded) {
 			if (!node.isMesh) return;
 			node.castShadow = true;
 			node.receiveShadow = true;
-			node.material = createPbrMaterial(getCharacterTextures(), node.material);
+			node.material = createCustomMaterial(
+				getCharacterTextures(),
+				node.material
+			);
 		});
 
 		scene.add(model);
 
+		// 3. Fire the final callback to setup animations, UI, etc.
 		if (onModelLoaded) {
 			onModelLoaded(model);
 		}
-	});
+	};
+}
+
+export function createMaskOverlay(scene, maskTexture, color) {
+	if (maskOverlayMesh) {
+		scene.remove(maskOverlayMesh);
+		maskOverlayMesh = null;
+	}
+
+	if (maskTexture && model) {
+		// Clone the model geometry for the overlay
+		maskOverlayMesh = model.clone();
+		maskOverlayMesh.scale.copy(model.scale);
+		maskOverlayMesh.position.copy(model.position);
+
+		// Apply overlay material to all meshes
+		maskOverlayMesh.traverse((node) => {
+			if (node.isMesh) {
+				node.material = createMaskOverlayMaterial(maskTexture, color);
+				node.castShadow = false;
+				node.receiveShadow = false;
+			}
+		});
+
+		scene.add(maskOverlayMesh);
+	}
+}
+
+export function hideMaskOverlay(scene) {
+	if (maskOverlayMesh) {
+		scene.remove(maskOverlayMesh);
+		maskOverlayMesh = null;
+	}
 }
 
 export function getCharacterTextures() {
 	const { paintTexture } = getPaintCanvas();
-	return { paintTexture, normalMap, metalnessMap, roughnessMap };
+	return {
+		paintTexture,
+		normalMap,
+		metalnessMap,
+		roughnessMap,
+		headMaskMap,
+		jacketMaskMap,
+		albedoMap,
+	};
 }
 
 export function getModel() {

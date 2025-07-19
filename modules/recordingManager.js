@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { FBXLoader } from "three/addons/loaders/FBXLoader.js";
 import { showModel } from "./modelManager.js";
 import { getCharacterTextures } from "./modelManager.js";
-import { createPbrMaterial } from "./materialManager.js";
+import { createCustomMaterial } from "./materialManager.js";
 
 let mediaRecorder;
 let recordedChunks = [];
@@ -88,8 +88,7 @@ function startRecording(renderer, scene) {
 				node.castShadow = true;
 				node.receiveShadow = true;
 				const oldMaterial = node.material;
-				// Use the centralized material creator for 100% consistency
-				node.material = createPbrMaterial(characterTextures, oldMaterial);
+				node.material = createCustomMaterial(characterTextures, oldMaterial);
 			}
 		});
 

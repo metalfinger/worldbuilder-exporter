@@ -13,7 +13,7 @@ export function setupScene() {
 		0.1,
 		1000
 	);
-	camera.position.set(0, 1.5, 3);
+	camera.position.set(0, 1.5, 2);
 
 	// Renderer
 	const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -24,7 +24,15 @@ export function setupScene() {
 	renderer.toneMapping = THREE.ACESFilmicToneMapping;
 	renderer.toneMappingExposure = 0.8;
 	renderer.outputColorSpace = THREE.SRGBColorSpace;
-	document.body.appendChild(renderer.domElement);
+
+	// Append canvas to the viewport container instead of body
+	const viewportContainer = document.querySelector(".viewport-container");
+	if (viewportContainer) {
+		viewportContainer.appendChild(renderer.domElement);
+	} else {
+		// Fallback to body if container not found
+		document.body.appendChild(renderer.domElement);
+	}
 
 	// Controls
 	const controls = new OrbitControls(camera, renderer.domElement);
