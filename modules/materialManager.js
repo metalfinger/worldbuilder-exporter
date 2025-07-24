@@ -8,9 +8,11 @@ export function createCustomMaterial(textures, originalMaterial) {
 		normalMap: normalMap,
 		metalnessMap: metalnessMap,
 		roughnessMap: roughnessMap,
-		metalness: 1.0,
-		roughness: 1.0,
+		metalness: 0.8, // Reduced from 1.0 for more realistic appearance
+		roughness: 0.9, // Reduced from 1.0 for better light interaction
 		skinning: originalMaterial && originalMaterial.skinning,
+		// Add environment map reflection for better material response
+		envMapIntensity: 0.3, // Subtle environment reflection
 	});
 }
 

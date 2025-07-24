@@ -48,6 +48,11 @@ let lastBrushSize = 0;
 let lastEraserSize = 0;
 let lastStickerSize = 0;
 
+// Mouse tracking for velocity and stroke smoothing
+let mouseHistory = [];
+let lastMouseTime = 0;
+let maxMouseHistoryLength = 5;
+
 const stickerFiles = [
 	"stickers/sticker1.png",
 	"stickers/sticker2.png",
@@ -382,21 +387,15 @@ function clearCanvas() {
 }
 
 function updateUndoRedoButtons() {
-	// Update floating panel buttons (for mobile)
+	// Update floating panel buttons
 	const undoBtn = document.getElementById("undo-btn");
 	const redoBtn = document.getElementById("redo-btn");
-
-	// Update top bar buttons (for desktop)
-	const undoBtnTopBar = document.getElementById("undo-btn-topbar");
-	const redoBtnTopBar = document.getElementById("redo-btn-topbar");
 
 	const undoDisabled = undoStack.length === 0;
 	const redoDisabled = redoStack.length === 0;
 
 	if (undoBtn) undoBtn.disabled = undoDisabled;
 	if (redoBtn) redoBtn.disabled = redoDisabled;
-	if (undoBtnTopBar) undoBtnTopBar.disabled = undoDisabled;
-	if (redoBtnTopBar) redoBtnTopBar.disabled = redoDisabled;
 }
 
 // Color History System
@@ -539,11 +538,11 @@ function setBrushColor(color) {
 	// Update brush indicator - will be handled by next mouse move
 	updateColorHistoryDisplay();
 
-	// Update mode status with shimmer effect
-	const modeStatus = document.getElementById("mode-status");
-	if (modeStatus) {
-		modeStatus.classList.add("updating");
-		setTimeout(() => modeStatus.classList.remove("updating"), 500);
+	// Update mode status with shimmer effect (if element exists)
+	const modeStatusElement = document.getElementById("mode-status");
+	if (modeStatusElement) {
+		modeStatusElement.classList.add("updating");
+		setTimeout(() => modeStatusElement.classList.remove("updating"), 500);
 	}
 }
 
@@ -695,6 +694,20 @@ function paintAtUV(currentPoint, lastPoint) {
 		saveState();
 	}
 
+	// Check velocity and UV distance for stroke validation
+	const velocityCheck = processStrokeWithVelocity(currentPoint, lastPoint);
+	const uvDistanceCheck =
+		!lastPoint || validateUVStroke(lastPoint, currentPoint);
+
+	// If either velocity is too high or UV distance is too large, use stamping
+	if (!velocityCheck || !uvDistanceCheck) {
+		if (!uvDistanceCheck) {
+			console.log("UV distance too large, using brush stamping");
+		}
+		paintBrushStamp(currentPoint);
+		return;
+	}
+
 	// Determine which mask canvas to use
 	let activeMaskCanvas = null;
 	if (activeMask === "head" && headMaskCanvas) {
@@ -777,6 +790,224 @@ function paintAtUV(currentPoint, lastPoint) {
 	playPaintSound();
 }
 
+// Validate UV stroke to prevent unwanted lines across disconnected areas
+function validateUVStroke(startUV, endUV) {
+	// Calculate UV distance
+	const deltaX = Math.abs(endUV.x - startUV.x);
+	const deltaY = Math.abs(endUV.y - startUV.y);
+	const uvDistance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+	// Maximum UV distance threshold - adjust this value to tune sensitivity
+	// Smaller values = more restrictive, larger values = more permissive
+	const maxUVDistance = 0.1; // 10% of UV space
+
+	return uvDistance <= maxUVDistance;
+}
+
+// Brush stamp function for discrete painting when line validation fails
+function paintBrushStamp(currentPoint) {
+	const { paintCanvas, paintCtx, paintTexture } = getPaintCanvas();
+	if (!paintCtx) return;
+
+	// Determine which mask canvas to use
+	let activeMaskCanvas = null;
+	if (activeMask === "head" && headMaskCanvas) {
+		activeMaskCanvas = headMaskCanvas;
+	} else if (activeMask === "jacket" && jacketMaskCanvas) {
+		activeMaskCanvas = jacketMaskCanvas;
+	}
+
+	if (activeMaskCanvas) {
+		// Create a temporary canvas for the brush stamp
+		const tempCanvas = document.createElement("canvas");
+		tempCanvas.width = paintCanvas.width;
+		tempCanvas.height = paintCanvas.height;
+		const tempCtx = tempCanvas.getContext("2d");
+
+		// Draw brush stamp on temp canvas
+		tempCtx.fillStyle = hexToRgba(brushColor, brushOpacity);
+		const x = currentPoint.x * paintCanvas.width;
+		const y = (1 - currentPoint.y) * paintCanvas.height;
+
+		tempCtx.beginPath();
+		tempCtx.arc(x, y, brushSize / 2, 0, Math.PI * 2);
+		tempCtx.fill();
+
+		// Apply mask to the stamp
+		tempCtx.globalCompositeOperation = "destination-in";
+		tempCtx.drawImage(activeMaskCanvas, 0, 0);
+
+		// Draw the masked stamp onto the main paint canvas
+		paintCtx.drawImage(tempCanvas, 0, 0);
+	} else {
+		// No mask - stamp normally
+		paintCtx.fillStyle = hexToRgba(brushColor, brushOpacity);
+		const x = currentPoint.x * paintCanvas.width;
+		const y = (1 - currentPoint.y) * paintCanvas.height;
+
+		paintCtx.beginPath();
+		paintCtx.arc(x, y, brushSize / 2, 0, Math.PI * 2);
+		paintCtx.fill();
+	}
+
+	paintTexture.needsUpdate = true;
+	updateMinimap();
+	playPaintSound();
+}
+
+// Track mouse movement for velocity calculation
+function trackMouseMovement(clientX, clientY) {
+	const currentTime = Date.now();
+
+	// Add current position to history
+	mouseHistory.push({
+		x: clientX,
+		y: clientY,
+		time: currentTime,
+	});
+
+	// Limit history length
+	if (mouseHistory.length > maxMouseHistoryLength) {
+		mouseHistory.shift();
+	}
+
+	lastMouseTime = currentTime;
+}
+
+// Calculate mouse velocity for stroke smoothing
+function getMouseVelocity() {
+	if (mouseHistory.length < 2) return 0;
+
+	const recent = mouseHistory[mouseHistory.length - 1];
+	const previous = mouseHistory[0];
+
+	const deltaX = recent.x - previous.x;
+	const deltaY = recent.y - previous.y;
+	const deltaTime = recent.time - previous.time;
+
+	if (deltaTime === 0) return 0;
+
+	const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+	return distance / deltaTime; // pixels per millisecond
+}
+
+// Enhanced stroke processing with velocity-based adjustments
+function processStrokeWithVelocity(currentPoint, lastPoint) {
+	const velocity = getMouseVelocity();
+	const maxVelocity = 2.0; // pixels per millisecond
+
+	// If moving too fast, use brush stamping instead of line drawing
+	if (velocity > maxVelocity && lastPoint) {
+		console.log(
+			`Fast movement detected (${velocity.toFixed(
+				2
+			)} px/ms), using brush stamping`
+		);
+		return false; // Indicate that we should use stamping instead of line
+	}
+
+	return true; // Proceed with normal line drawing
+}
+
+// Enhanced stroke processing for eraser with velocity-based adjustments
+function processEraserStrokeWithVelocity(currentPoint, lastPoint) {
+	const velocity = getMouseVelocity();
+	const maxVelocity = 2.0; // pixels per millisecond
+
+	// If moving too fast, use eraser stamping instead of line drawing
+	if (velocity > maxVelocity && lastPoint) {
+		console.log(
+			`Fast eraser movement detected (${velocity.toFixed(
+				2
+			)} px/ms), using eraser stamping`
+		);
+		return false; // Indicate that we should use stamping instead of line
+	}
+
+	return true; // Proceed with normal line drawing
+}
+
+// Eraser stamp function for discrete erasing when line validation fails
+function eraseStamp(currentPoint) {
+	const { albedoMap } = getCharacterTextures();
+	const { paintCanvas, paintCtx, paintTexture } = getPaintCanvas();
+
+	if (!paintCanvas || !paintCtx || !albedoMap || !albedoMap.image) {
+		return;
+	}
+
+	// Convert UV coordinates to canvas pixel coordinates
+	const x = currentPoint.x * paintCanvas.width;
+	const y = (1 - currentPoint.y) * paintCanvas.height;
+
+	// Check mask restrictions if active
+	if (activeMask !== "none") {
+		const maskCanvas =
+			activeMask === "head" ? headMaskCanvas : jacketMaskCanvas;
+		if (!maskCanvas) return;
+
+		// Check if the point is within the mask area
+		const maskCtx = maskCanvas.getContext("2d");
+		const imageData = maskCtx.getImageData(x, y, 1, 1);
+		const alpha = imageData.data[3];
+
+		// If alpha is 0 (transparent), we're outside the mask area
+		if (alpha === 0) {
+			return; // Don't erase outside mask
+		}
+	}
+
+	// Create a temporary canvas to copy original texture data
+	const tempCanvas = document.createElement("canvas");
+	tempCanvas.width = paintCanvas.width;
+	tempCanvas.height = paintCanvas.height;
+	const tempCtx = tempCanvas.getContext("2d");
+
+	// Draw the original texture to temp canvas
+	tempCtx.drawImage(albedoMap.image, 0, 0, tempCanvas.width, tempCanvas.height);
+
+	// Create eraser shape on a temporary canvas
+	const eraserCanvas = document.createElement("canvas");
+	eraserCanvas.width = paintCanvas.width;
+	eraserCanvas.height = paintCanvas.height;
+	const eraserCtx = eraserCanvas.getContext("2d");
+
+	// Draw the eraser stamp (circle)
+	eraserCtx.fillStyle = "white";
+	eraserCtx.beginPath();
+	eraserCtx.arc(x, y, eraserSize / 2, 0, Math.PI * 2);
+	eraserCtx.fill();
+
+	// Apply mask restriction if active
+	if (activeMask !== "none") {
+		const maskCanvas =
+			activeMask === "head" ? headMaskCanvas : jacketMaskCanvas;
+		if (maskCanvas) {
+			eraserCtx.globalCompositeOperation = "destination-in";
+			eraserCtx.drawImage(maskCanvas, 0, 0);
+		}
+	}
+
+	// Apply the eraser to the paint canvas
+	paintCtx.save();
+
+	// Remove painted pixels where eraser shape is
+	paintCtx.globalCompositeOperation = "destination-out";
+	paintCtx.drawImage(eraserCanvas, 0, 0);
+
+	// Restore original texture in the erased areas
+	paintCtx.globalCompositeOperation = "destination-over";
+	paintCtx.drawImage(tempCanvas, 0, 0);
+
+	// Restore context
+	paintCtx.restore();
+
+	// Update texture and minimap
+	paintTexture.needsUpdate = true;
+	updateMinimap();
+	playPaintSound();
+}
+
 // Improved Eraser Function - Using Clear Canvas Approach with Layer Support
 function eraseAtUV(currentPoint, lastPoint) {
 	const { albedoMap } = getCharacterTextures();
@@ -790,6 +1021,23 @@ function eraseAtUV(currentPoint, lastPoint) {
 	if (!lastPoint) {
 		// Only save on new stroke
 		saveState();
+	}
+
+	// Check velocity and UV distance for eraser stroke validation
+	const velocityCheck = processEraserStrokeWithVelocity(
+		currentPoint,
+		lastPoint
+	);
+	const uvDistanceCheck =
+		!lastPoint || validateUVStroke(lastPoint, currentPoint);
+
+	// If either velocity is too high or UV distance is too large, use eraser stamping
+	if (!velocityCheck || !uvDistanceCheck) {
+		if (!uvDistanceCheck) {
+			console.log("UV distance too large for eraser, using eraser stamping");
+		}
+		eraseStamp(currentPoint);
+		return;
 	}
 
 	// Convert UV coordinates to canvas pixel coordinates
@@ -939,13 +1187,7 @@ export function setupUI(camera, renderer, controls) {
 	const eraserBtn = document.getElementById("eraserBtn");
 	const rotateBtn = document.getElementById("rotateBtn");
 	const stickerBtn = document.getElementById("stickerBtn");
-	const recordBtn = document.getElementById("recordBtn");
-	const clearCanvasBtn = document.getElementById("clearCanvasBtn");
-	const startRecordBtn = document.getElementById("startRecordBtn");
-	const cancelRecordBtn = document.getElementById("cancelRecordBtn");
-	const recordConfirmControls = document.getElementById(
-		"record-confirm-controls"
-	);
+
 	const modeStatus = document.getElementById("mode-status");
 	const stickerList = document.getElementById("sticker-list");
 	const stickerSizeInput = document.getElementById("stickerSize");
@@ -976,15 +1218,11 @@ export function setupUI(camera, renderer, controls) {
 		`;
 		document.body.appendChild(panel);
 
-		// Add event listeners for both floating panel and top bar buttons
-		document.getElementById("undo-btn").addEventListener("click", undo);
-		document.getElementById("redo-btn").addEventListener("click", redo);
-
-		// Add event listeners for top bar buttons (if they exist)
-		const undoTopBar = document.getElementById("undo-btn-topbar");
-		const redoTopBar = document.getElementById("redo-btn-topbar");
-		if (undoTopBar) undoTopBar.addEventListener("click", undo);
-		if (redoTopBar) redoTopBar.addEventListener("click", redo);
+		// Add event listeners for floating panel buttons
+		const undoBtn = document.getElementById("undo-btn");
+		const redoBtn = document.getElementById("redo-btn");
+		if (undoBtn) undoBtn.addEventListener("click", undo);
+		if (redoBtn) redoBtn.addEventListener("click", redo);
 	}
 
 	function updateLayerUI() {
@@ -1007,22 +1245,29 @@ export function setupUI(camera, renderer, controls) {
 		const brushPanel = document.querySelector(".floating-brush-panel");
 		const stickerPanel = document.querySelector(".floating-sticker-panel");
 		const layersPanel = document.querySelector(".floating-layers-panel");
+		const shortcutsPanel = document.querySelector(".floating-shortcuts-panel");
 
 		// Hide all panels by default
 		if (brushPanel) brushPanel.style.display = "none";
 		if (stickerPanel) stickerPanel.style.display = "none";
 		if (layersPanel) layersPanel.style.display = "none";
+		if (shortcutsPanel) shortcutsPanel.style.display = "none";
 
 		// Show relevant panels for each mode
 		if (mode === "paint") {
 			if (brushPanel) brushPanel.style.display = "block";
 			if (layersPanel) layersPanel.style.display = "block";
+			if (shortcutsPanel) shortcutsPanel.style.display = "block";
 		} else if (mode === "eraser") {
 			if (brushPanel) brushPanel.style.display = "block";
 			if (layersPanel) layersPanel.style.display = "block";
+			if (shortcutsPanel) shortcutsPanel.style.display = "block";
 		} else if (mode === "sticker") {
 			if (stickerPanel) stickerPanel.style.display = "block";
 			if (layersPanel) layersPanel.style.display = "block";
+			if (shortcutsPanel) shortcutsPanel.style.display = "block";
+		} else if (mode === "rotate") {
+			if (shortcutsPanel) shortcutsPanel.style.display = "block";
 		}
 
 		// Update body data attribute for CSS styling
@@ -1062,6 +1307,31 @@ export function setupUI(camera, renderer, controls) {
 		mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
 		raycaster.setFromCamera(mouse, camera);
 		return raycaster.intersectObject(model, true);
+	}
+
+	// Validate if intersection point is a valid target for painting
+	function isValidPaintTarget(intersection) {
+		// Check if the face is front-facing (helps prevent painting on back faces)
+		if (intersection.face) {
+			const face = intersection.face;
+			const object = intersection.object;
+
+			// Get the world normal of the face
+			const worldNormal = face.normal.clone();
+			worldNormal.transformDirection(object.matrixWorld);
+
+			// Get camera direction
+			const cameraDirection = new THREE.Vector3();
+			camera.getWorldDirection(cameraDirection);
+
+			// Check if face is roughly facing the camera (dot product > 0)
+			const dotProduct = worldNormal.dot(cameraDirection.negate());
+
+			// Only paint on surfaces facing the camera (prevents back-face painting)
+			return dotProduct > 0.1; // Threshold to avoid edge cases
+		}
+
+		return true; // Default to allowing paint if no face normal available
 	}
 
 	// Enhanced brush controls - work for both brush and eraser
@@ -1121,13 +1391,13 @@ export function setupUI(camera, renderer, controls) {
 			.querySelectorAll(".tool-btn")
 			.forEach((btn) => btn.classList.remove("active"));
 
-		// Update mode status
+		// Update mode status (if element exists)
 		if (mode === "paint") {
-			modeStatus.textContent = "Paint Mode";
+			if (modeStatus) modeStatus.textContent = "Paint Mode";
 			paintBtn.classList.add("active");
 			controls.enabled = false;
 			renderer.domElement.style.cursor = "none";
-			showToolStatus("🎨 Paint Mode - Click and drag to paint");
+			showToolStatus("🎨 Paint Mode - Click and drag to paint (Press B)");
 			// Update brush controls for paint mode
 			if (brushSizeInput) brushSizeInput.value = brushSize;
 			if (brushSizeValue) brushSizeValue.textContent = brushSize;
@@ -1135,37 +1405,36 @@ export function setupUI(camera, renderer, controls) {
 			if (brushOpacityValue)
 				brushOpacityValue.textContent = brushOpacity.toFixed(2);
 		} else if (mode === "eraser") {
-			modeStatus.textContent = "Eraser Mode";
+			if (modeStatus) modeStatus.textContent = "Eraser Mode";
 			eraserBtn.classList.add("active");
 			controls.enabled = false;
 			renderer.domElement.style.cursor = "none";
-			showToolStatus("🧽 Eraser Mode - Click and drag to erase to original");
+			showToolStatus(
+				"🧽 Eraser Mode - Click and drag to erase to original (Press E)"
+			);
 			// Update brush controls for eraser mode
 			if (brushSizeInput) brushSizeInput.value = eraserSize;
 			if (brushSizeValue) brushSizeValue.textContent = eraserSize + " (Eraser)";
 			if (brushOpacityInput) brushOpacityInput.value = 1.0; // Eraser is always full opacity
 			if (brushOpacityValue) brushOpacityValue.textContent = "1.00 (Eraser)";
 		} else if (mode === "sticker") {
-			modeStatus.textContent = "Sticker Mode";
+			if (modeStatus) modeStatus.textContent = "Sticker Mode";
 			stickerBtn.classList.add("active");
 			controls.enabled = false;
 			renderer.domElement.style.cursor = "none";
 			showToolStatus(
-				"🏷️ Sticker Mode - Click to place stickers, [ ] to resize"
+				"🏷️ Sticker Mode - Click to place stickers, [ ] to resize (Press S)"
 			);
 		} else if (mode === "rotate") {
-			modeStatus.textContent = "Rotate Mode";
+			if (modeStatus) modeStatus.textContent = "Rotate Mode";
 			rotateBtn.classList.add("active");
 			controls.enabled = true;
 			renderer.domElement.style.cursor = "grab";
-			showToolStatus("🔄 Rotate Mode - Drag to rotate view");
-		} else if (mode === "record") {
-			modeStatus.textContent = "Ready to Record";
-			recordBtn.classList.add("active");
-			controls.enabled = true;
-			renderer.domElement.style.cursor = "default";
-			recordConfirmControls.style.display = "flex";
-			showToolStatus("🎬 Record Mode - Ready to capture animation");
+			showToolStatus("🔄 Rotate Mode - Drag to rotate view (Press Space)");
+			console.log(
+				"UI Manager: Rotate mode set, controls enabled:",
+				controls.enabled
+			);
 		}
 
 		updatePanelVisibility();
@@ -1182,21 +1451,47 @@ export function setupUI(camera, renderer, controls) {
 		if (maskName === "none") {
 			if (scene) hideMaskOverlay(scene);
 			if (mode === "eraser") {
-				showToolStatus("🧽 Eraser Mode - Erase anywhere on full body");
+				showToolStatus(
+					"🧽 Eraser Mode - Erase anywhere on full body (Press E)"
+				);
+			} else if (mode === "paint") {
+				showToolStatus("🎨 Paint Mode - Paint anywhere on model (Press B)");
+			} else if (mode === "sticker") {
+				showToolStatus("�️ Sticker Mode - Place stickers anywhere (Press S)");
 			} else {
-				showToolStatus("🌐 Full Body - Paint anywhere on model");
+				showToolStatus("�🌐 Full Body - Paint anywhere on model");
 			}
 		} else if (maskName === "head") {
 			if (scene) createMaskOverlay(scene, textures.headMaskMap, 0x00ff88);
 			if (mode === "eraser") {
-				showToolStatus("🧽 Head Only - Erase restricted to head area");
+				showToolStatus(
+					"🧽 Eraser Mode - Erase restricted to head area (Press E)"
+				);
+			} else if (mode === "paint") {
+				showToolStatus(
+					"🎨 Paint Mode - Paint restricted to head area (Press B)"
+				);
+			} else if (mode === "sticker") {
+				showToolStatus(
+					"🏷️ Sticker Mode - Place stickers on head only (Press S)"
+				);
 			} else {
 				showToolStatus("👤 Head Only - Paint restricted to head area");
 			}
 		} else if (maskName === "jacket") {
 			if (scene) createMaskOverlay(scene, textures.jacketMaskMap, 0x0088ff);
 			if (mode === "eraser") {
-				showToolStatus("🧽 Jacket Only - Erase restricted to jacket area");
+				showToolStatus(
+					"🧽 Eraser Mode - Erase restricted to jacket area (Press E)"
+				);
+			} else if (mode === "paint") {
+				showToolStatus(
+					"🎨 Paint Mode - Paint restricted to jacket area (Press B)"
+				);
+			} else if (mode === "sticker") {
+				showToolStatus(
+					"🏷️ Sticker Mode - Place stickers on jacket only (Press S)"
+				);
 			} else {
 				showToolStatus("👔 Jacket Only - Paint restricted to jacket area");
 			}
@@ -1209,15 +1504,52 @@ export function setupUI(camera, renderer, controls) {
 		updateBrushPanelForMode();
 	}
 
-	function resetToPaintMode() {
-		setMode("paint");
-		recordConfirmControls.style.display = "none";
-	}
-
-	// Keep only essential modifier key tracking (no shortcuts)
+	// Enhanced keyboard shortcuts with tool switching
 	document.addEventListener("keydown", (e) => {
+		// Track modifier keys
 		if (e.key === "Shift") isShiftPressed = true;
 		if (e.ctrlKey) isCtrlPressed = true;
+
+		// Tool shortcuts - only work on paint screen (screen 2)
+		const currentScreen = document.body.getAttribute("data-screen");
+		if (currentScreen === "paint" && !e.repeat) {
+			// Prevent shortcuts when typing in text input fields, but allow for color/range inputs
+			if (e.target.tagName === "INPUT") {
+				const inputType = e.target.type.toLowerCase();
+				// Block shortcuts only for text-based inputs
+				if (
+					inputType === "text" ||
+					inputType === "email" ||
+					inputType === "password" ||
+					inputType === "search" ||
+					inputType === "url" ||
+					inputType === "tel"
+				) {
+					return;
+				}
+			} else if (e.target.tagName === "TEXTAREA") {
+				return;
+			}
+
+			switch (e.key.toLowerCase()) {
+				case " ": // Spacebar for rotate
+					e.preventDefault(); // Prevent page scroll
+					setMode("rotate");
+					break;
+				case "b": // B for brush
+					e.preventDefault();
+					setMode("paint");
+					break;
+				case "e": // E for eraser
+					e.preventDefault();
+					setMode("eraser");
+					break;
+				case "s": // S for stickers
+					e.preventDefault();
+					setMode("sticker");
+					break;
+			}
+		}
 	});
 
 	document.addEventListener("keyup", (e) => {
@@ -1242,14 +1574,6 @@ export function setupUI(camera, renderer, controls) {
 		rotateBtn.addEventListener("click", () => setMode("rotate"));
 	}
 
-	if (recordBtn) {
-		recordBtn.addEventListener("click", () => setMode("record"));
-	}
-
-	if (clearCanvasBtn) {
-		clearCanvasBtn.addEventListener("click", clearCanvas);
-	}
-
 	// Set initial mode
 	setMode("rotate");
 
@@ -1272,11 +1596,6 @@ export function setupUI(camera, renderer, controls) {
 			"success"
 		);
 	});
-
-	// Record controls
-	if (cancelRecordBtn) {
-		cancelRecordBtn.addEventListener("click", resetToPaintMode);
-	}
 
 	function loadStickers() {
 		const textureLoader = new THREE.TextureLoader();
@@ -1331,6 +1650,9 @@ export function setupUI(camera, renderer, controls) {
 		const clientY =
 			event.clientY || (event.touches && event.touches[0].clientY);
 
+		// Track mouse movement for velocity calculation
+		trackMouseMovement(clientX, clientY);
+
 		// Use optimized throttled handler
 		handleMouseMoveThrottled(clientX, clientY);
 
@@ -1338,14 +1660,18 @@ export function setupUI(camera, renderer, controls) {
 
 		const intersects = getIntersects(event);
 		if (intersects.length > 0 && intersects[0].uv) {
-			if (mode === "paint") {
-				paintAtUV(intersects[0].uv, lastPoint);
-				lastPoint = intersects[0].uv;
-			} else if (mode === "eraser") {
-				eraseAtUV(intersects[0].uv, lastPoint);
-				lastPoint = intersects[0].uv;
-			} else if (mode === "sticker") {
-				placeSticker(intersects[0].uv);
+			// Additional validation: check if intersection is on front-facing surface
+			const intersection = intersects[0];
+			if (intersection.face && isValidPaintTarget(intersection)) {
+				if (mode === "paint") {
+					paintAtUV(intersection.uv, lastPoint);
+					lastPoint = intersection.uv;
+				} else if (mode === "eraser") {
+					eraseAtUV(intersection.uv, lastPoint);
+					lastPoint = intersection.uv;
+				} else if (mode === "sticker") {
+					placeSticker(intersection.uv);
+				}
 			}
 		}
 	});
@@ -1354,16 +1680,22 @@ export function setupUI(camera, renderer, controls) {
 		if (mode === "rotate") return;
 		isPainting = true;
 
+		// Clear mouse history for new stroke
+		mouseHistory = [];
+
 		const intersects = getIntersects(event);
 		if (intersects.length > 0 && intersects[0].uv) {
-			if (mode === "paint") {
-				paintAtUV(intersects[0].uv, null);
-				lastPoint = intersects[0].uv;
-			} else if (mode === "eraser") {
-				eraseAtUV(intersects[0].uv, null);
-				lastPoint = intersects[0].uv;
-			} else if (mode === "sticker") {
-				placeSticker(intersects[0].uv);
+			const intersection = intersects[0];
+			if (isValidPaintTarget(intersection)) {
+				if (mode === "paint") {
+					paintAtUV(intersection.uv, null);
+					lastPoint = intersection.uv;
+				} else if (mode === "eraser") {
+					eraseAtUV(intersection.uv, null);
+					lastPoint = intersection.uv;
+				} else if (mode === "sticker") {
+					placeSticker(intersection.uv);
+				}
 			}
 		}
 	});
@@ -1371,11 +1703,15 @@ export function setupUI(camera, renderer, controls) {
 	renderer.domElement.addEventListener("mouseup", () => {
 		isPainting = false;
 		lastPoint = null;
+		// Clear mouse history when ending stroke
+		mouseHistory = [];
 	});
 
 	renderer.domElement.addEventListener("mouseleave", () => {
 		isPainting = false;
 		lastPoint = null;
+		// Clear mouse history when leaving canvas
+		mouseHistory = [];
 		hideCursorsOptimized();
 	});
 
@@ -1385,16 +1721,22 @@ export function setupUI(camera, renderer, controls) {
 		(event) => {
 			if (mode === "rotate") return;
 			isPainting = true;
+			// Clear mouse history for new stroke
+			mouseHistory = [];
+
 			const intersects = getIntersects(event);
 			if (intersects.length > 0 && intersects[0].uv) {
-				if (mode === "paint") {
-					paintAtUV(intersects[0].uv, null);
-					lastPoint = intersects[0].uv;
-				} else if (mode === "eraser") {
-					eraseAtUV(intersects[0].uv, null);
-					lastPoint = intersects[0].uv;
-				} else if (mode === "sticker") {
-					placeSticker(intersects[0].uv);
+				const intersection = intersects[0];
+				if (isValidPaintTarget(intersection)) {
+					if (mode === "paint") {
+						paintAtUV(intersection.uv, null);
+						lastPoint = intersection.uv;
+					} else if (mode === "eraser") {
+						eraseAtUV(intersection.uv, null);
+						lastPoint = intersection.uv;
+					} else if (mode === "sticker") {
+						placeSticker(intersection.uv);
+					}
 				}
 			}
 		},
@@ -1405,14 +1747,24 @@ export function setupUI(camera, renderer, controls) {
 		"touchmove",
 		(event) => {
 			if (mode === "rotate" || !isPainting) return;
+
+			const clientX = event.touches && event.touches[0].clientX;
+			const clientY = event.touches && event.touches[0].clientY;
+			if (clientX !== undefined && clientY !== undefined) {
+				trackMouseMovement(clientX, clientY);
+			}
+
 			const intersects = getIntersects(event);
 			if (intersects.length > 0 && intersects[0].uv) {
-				if (mode === "paint") {
-					paintAtUV(intersects[0].uv, lastPoint);
-					lastPoint = intersects[0].uv;
-				} else if (mode === "eraser") {
-					eraseAtUV(intersects[0].uv, lastPoint);
-					lastPoint = intersects[0].uv;
+				const intersection = intersects[0];
+				if (isValidPaintTarget(intersection)) {
+					if (mode === "paint") {
+						paintAtUV(intersection.uv, lastPoint);
+						lastPoint = intersection.uv;
+					} else if (mode === "eraser") {
+						eraseAtUV(intersection.uv, lastPoint);
+						lastPoint = intersection.uv;
+					}
 				}
 			}
 		},
@@ -1422,6 +1774,8 @@ export function setupUI(camera, renderer, controls) {
 	renderer.domElement.addEventListener("touchend", () => {
 		isPainting = false;
 		lastPoint = null;
+		// Clear mouse history when ending touch
+		mouseHistory = [];
 	});
 
 	// Initialize everything
@@ -1511,7 +1865,7 @@ function initializeMobileAutoHide(setModeFunction) {
 			// Reset panel timers when mode changes
 			resetAutoHideTimers();
 
-			// Add visual feedback for mode change
+			// Add visual feedback for mode change (if element exists)
 			const modeDisplay = document.getElementById("mode-status");
 			if (modeDisplay) {
 				modeDisplay.style.transform = "scale(1.1)";
@@ -1612,3 +1966,54 @@ function setupPanelToggles() {
 		});
 	}
 }
+
+// Auto-hide top UI elements
+function setupTopUIAutoHide() {
+	const topUiContainer = document.getElementById("top-ui-container");
+	const screenProgress = document.querySelector(".screen-progress");
+	const screenHeader = document.querySelector(".screen-header");
+
+	let hideTimeout;
+
+	function showTopUI() {
+		if (screenProgress) screenProgress.classList.remove("auto-hidden");
+		if (screenHeader) screenHeader.classList.remove("auto-hidden");
+		if (topUiContainer) topUiContainer.classList.add("active");
+		clearTimeout(hideTimeout);
+		hideTimeout = setTimeout(hideTopUI, 3000); // Hide after 3 seconds
+	}
+
+	function hideTopUI() {
+		if (screenProgress) screenProgress.classList.add("auto-hidden");
+		if (screenHeader) screenHeader.classList.add("auto-hidden");
+		if (topUiContainer) topUiContainer.classList.remove("active");
+	}
+
+	if (topUiContainer) {
+		topUiContainer.addEventListener("mouseenter", showTopUI);
+		topUiContainer.addEventListener("mouseleave", hideTopUI);
+		document.addEventListener("mousemove", (e) => {
+			if (e.clientY < 150) {
+				showTopUI();
+			}
+		});
+	}
+
+	// Initially hide the UI
+	hideTimeout = setTimeout(hideTopUI, 1000);
+}
+
+// Call this in your initialization logic
+document.addEventListener("DOMContentLoaded", () => {
+	// ... your other init code
+	// setupTopUIAutoHide(); // Commented out to keep top UI visible all the time
+
+	// Ensure top UI elements are always visible
+	const topUiContainer = document.getElementById("top-ui-container");
+	const screenProgress = document.querySelector(".screen-progress");
+	const screenHeader = document.querySelector(".screen-header");
+
+	if (topUiContainer) topUiContainer.classList.add("active");
+	if (screenProgress) screenProgress.classList.remove("auto-hidden");
+	if (screenHeader) screenHeader.classList.remove("auto-hidden");
+});

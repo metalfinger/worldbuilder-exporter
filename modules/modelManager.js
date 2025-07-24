@@ -141,3 +141,21 @@ export function showModel(visible) {
 export function getPaintCanvas() {
 	return { paintCanvas, paintCtx, paintTexture };
 }
+
+export function applyBaseColor(color) {
+	const { paintCanvas, paintCtx, paintTexture } = getPaintCanvas();
+	if (!paintCanvas || !paintCtx || !albedoMap) {
+		console.log("Paint canvas or albedo map not ready");
+		return;
+	}
+
+	// Clear the paint canvas and fill with solid base color (normal mode)
+	paintCtx.clearRect(0, 0, paintCanvas.width, paintCanvas.height);
+	paintCtx.fillStyle = color;
+	paintCtx.fillRect(0, 0, paintCanvas.width, paintCanvas.height);
+
+	// Update the texture
+	paintTexture.needsUpdate = true;
+
+	console.log("Applied solid base color:", color);
+}

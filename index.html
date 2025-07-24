@@ -10,10 +10,24 @@
 		/>
 		<link rel="stylesheet" href="style.css" />
 	</head>
-	<body>
-		<!-- Recording Indicator -->
-		<div id="recording-indicator" class="recording-indicator">
-			Recording in progress...
+	<body data-screen="base-color">
+		<!-- Top UI hover trigger area -->
+		<div id="top-ui-container" class="top-ui-container"></div>
+
+		<!-- Screen Progress Indicator -->
+		<div class="screen-progress">
+			<div class="progress-step active" data-step="1">
+				<span class="step-number">1</span>
+				<span class="step-label">Base Color</span>
+			</div>
+			<div class="progress-step" data-step="2">
+				<span class="step-number">2</span>
+				<span class="step-label">Paint & Style</span>
+			</div>
+			<div class="progress-step" data-step="3">
+				<span class="step-number">3</span>
+				<span class="step-label">Pose & Finish</span>
+			</div>
 		</div>
 
 		<!-- Tool Status in Viewport -->
@@ -36,223 +50,395 @@
 			<!-- Canvas will be inserted here by Three.js -->
 		</div>
 
-		<!-- Floating UI Elements -->
+		<!-- SCREEN 1: Base Color Selection -->
+		<div id="screen-base-color" class="screen-container active">
+			<div class="screen-header">
+				<h2>🎨 Choose Base Color</h2>
+				<p>
+					Select a base color for your character and rotate to explore all
+					angles
+				</p>
+			</div>
 
-		<!-- Top Floating Bar -->
-		<div class="floating-top-bar">
-			<!-- First Row: App Title, Mode, Record -->
-			<div class="top-bar-row-1">
-				<div class="app-title">🌎 WorldBuilder</div>
-				<div class="mode-display">
-					<span id="mode-status">Rotate Mode</span>
+			<div class="base-color-controls">
+				<div class="color-palette">
+					<div
+						class="color-option active"
+						data-color="#ff6b6b"
+						style="background: #ff6b6b"
+					></div>
+					<div
+						class="color-option"
+						data-color="#4ecdc4"
+						style="background: #4ecdc4"
+					></div>
+					<div
+						class="color-option"
+						data-color="#45b7d1"
+						style="background: #45b7d1"
+					></div>
+					<div
+						class="color-option"
+						data-color="#96ceb4"
+						style="background: #96ceb4"
+					></div>
+					<div
+						class="color-option"
+						data-color="#feca57"
+						style="background: #feca57"
+					></div>
+					<div
+						class="color-option"
+						data-color="#ff9ff3"
+						style="background: #ff9ff3"
+					></div>
+					<div
+						class="color-option"
+						data-color="#54a0ff"
+						style="background: #54a0ff"
+					></div>
+					<div
+						class="color-option"
+						data-color="#5f27cd"
+						style="background: #5f27cd"
+					></div>
+					<div
+						class="color-option"
+						data-color="#c8d6e5"
+						style="background: #c8d6e5"
+					></div>
+					<div
+						class="color-option"
+						data-color="#1dd1a1"
+						style="background: #1dd1a1"
+					></div>
 				</div>
-				<div class="record-section">
-					<button class="undo-btn" id="undo-btn-topbar" title="Undo">↶</button>
-					<button class="redo-btn" id="redo-btn-topbar" title="Redo">↷</button>
-					<button id="recordBtn" class="record-button" title="Record Animation">
-						<svg viewBox="0 0 24 24" width="16" height="16">
-							<circle cx="12" cy="12" r="8" fill="red" />
-						</svg>
-						Record
-					</button>
-					<div id="record-confirm-controls" class="record-controls">
-						<button id="startRecordBtn" class="btn-confirm">Start</button>
-						<button id="cancelRecordBtn" class="btn-cancel">Cancel</button>
+
+				<div class="custom-color-section">
+					<label for="custom-base-color">Or pick a custom color:</label>
+					<input type="color" id="custom-base-color" value="#ff6b6b" />
+				</div>
+			</div>
+
+			<div class="screen-actions">
+				<button id="next-to-paint" class="btn-primary">
+					Next: Paint & Style →
+				</button>
+			</div>
+		</div>
+
+		<!-- SCREEN 2: Paint & Style (Modified existing screen) -->
+		<div id="screen-paint" class="screen-container">
+			<div class="screen-header">
+				<h2>🎨 Paint & Style</h2>
+				<p>Paint details, add stickers, and customize your character</p>
+			</div>
+
+			<!-- Left Floating Toolbar -->
+			<div id="toolbar" class="floating-toolbar">
+				<button
+					id="rotateBtn"
+					class="tool-btn active"
+					title="Rotate Mode"
+					data-tool="rotate"
+				>
+					<svg viewBox="0 0 24 24" width="18" height="18">
+						<path
+							d="M11 6.5V2h2v4.5h-2zm6.5 4.5H22v2h-4.5v-2zm-11 0H2v2h4.5v-2zM11 17.5V22h2v-4.5h-2zM8 12c0-2.21 1.79-4 4-4s4 1.79 4 4-1.79 4-4 4-4-1.79-4-4z"
+							fill="currentColor"
+						/>
+					</svg>
+				</button>
+				<button
+					id="paintBtn"
+					class="tool-btn"
+					title="Paint Mode"
+					data-tool="paint"
+				>
+					<svg viewBox="0 0 24 24" width="18" height="18">
+						<path
+							d="M17.25 2.1C16.5 1.35 15.3 1.35 14.55 2.1L12.5 4.15 15.85 7.5 17.9 5.45C18.65 4.7 18.65 3.5 17.9 2.75L17.25 2.1M4 13.25V17h3.75L15.1 9.65 11.75 6.3 4 13.25z"
+							fill="currentColor"
+						/>
+					</svg>
+				</button>
+				<button
+					id="eraserBtn"
+					class="tool-btn"
+					title="Eraser Mode"
+					data-tool="eraser"
+				>
+					<svg viewBox="0 0 24 24" width="18" height="18">
+						<path
+							d="M16.24 3.56l4.95 4.94c.78.79.78 2.05 0 2.84L12 20.53a4.008 4.008 0 0 1-5.66 0L2.81 17c-.78-.79-.78-2.05 0-2.84l10.6-10.6c.79-.78 2.05-.78 2.83 0M4.22 15.58l3.54 3.53c.78.79 2.04.79 2.83 0l3.53-3.53l-4.95-4.95l-4.95 4.95z"
+							fill="currentColor"
+						/>
+					</svg>
+				</button>
+				<button
+					id="stickerBtn"
+					class="tool-btn"
+					title="Sticker Mode"
+					data-tool="sticker"
+				>
+					<svg viewBox="0 0 24 24" width="18" height="18">
+						<path
+							d="M5.5 2C3.56 2 2 3.56 2 5.5v13C2 20.44 3.56 22 5.5 22H16l6-6V5.5C22 3.56 20.44 2 18.5 2H5.5zm0 6h6.5v2H5.5V8zm0 4h3.5v2H5.5v-4z"
+							fill="currentColor"
+						/>
+					</svg>
+				</button>
+			</div>
+
+			<!-- Single Responsive Layers Panel -->
+			<div class="floating-layers-panel">
+				<div class="layer-list">
+					<div
+						class="layer-item active"
+						id="layer-none"
+						title="Paint/Erase on Full Body"
+					>
+						<div class="layer-icon">🌐</div>
+						<div class="layer-name">Full Body</div>
+					</div>
+					<div
+						class="layer-item"
+						id="layer-head"
+						title="Paint/Erase Head Area Only"
+					>
+						<div class="layer-icon">👤</div>
+						<div class="layer-name">Head Only</div>
+					</div>
+					<div
+						class="layer-item"
+						id="layer-jacket"
+						title="Paint/Erase Jacket Area Only"
+					>
+						<div class="layer-icon">👔</div>
+						<div class="layer-name">Jacket Only</div>
 					</div>
 				</div>
 			</div>
 
-			<!-- Second Row: Empty space for undo/redo alignment -->
-			<div class="top-bar-row-2">
-				<div></div>
-				<!-- Empty left side for balance -->
-
-				<div></div>
-				<!-- Empty center - layers panel will be positioned via CSS -->
-
-				<!-- Undo/Redo Panel (right) -->
-				<div class="undo-redo-panel">
-					<button class="undo-btn" id="undo-btn" title="Undo">↶</button>
-					<button class="redo-btn" id="redo-btn" title="Redo">↷</button>
+			<!-- Floating Keyboard Shortcuts Panel -->
+			<div class="floating-shortcuts-panel" id="shortcuts-panel">
+				<div class="panel-header">
+					<span>⌨️ Shortcuts</span>
 				</div>
-			</div>
-		</div>
-
-		<!-- Single Responsive Layers Panel -->
-		<div class="floating-layers-panel">
-			<div class="layer-list">
-				<div
-					class="layer-item active"
-					id="layer-none"
-					title="Paint/Erase on Full Body"
-				>
-					<div class="layer-icon">🌐</div>
-					<div class="layer-name">Full Body</div>
-				</div>
-				<div
-					class="layer-item"
-					id="layer-head"
-					title="Paint/Erase Head Area Only"
-				>
-					<div class="layer-icon">👤</div>
-					<div class="layer-name">Head Only</div>
-				</div>
-				<div
-					class="layer-item"
-					id="layer-jacket"
-					title="Paint/Erase Jacket Area Only"
-				>
-					<div class="layer-icon">👔</div>
-					<div class="layer-name">Jacket Only</div>
-				</div>
-			</div>
-		</div>
-
-		<!-- Left Floating Toolbar -->
-		<div id="toolbar" class="floating-toolbar">
-			<button
-				id="rotateBtn"
-				class="tool-btn active"
-				title="Rotate Mode"
-				data-tool="rotate"
-			>
-				<svg viewBox="0 0 24 24" width="18" height="18">
-					<path
-						d="M11 6.5V2h2v4.5h-2zm6.5 4.5H22v2h-4.5v-2zm-11 0H2v2h4.5v-2zM11 17.5V22h2v-4.5h-2zM8 12c0-2.21 1.79-4 4-4s4 1.79 4 4-1.79 4-4 4-4-1.79-4-4z"
-						fill="currentColor"
-					/>
-				</svg>
-			</button>
-			<button
-				id="paintBtn"
-				class="tool-btn"
-				title="Paint Mode"
-				data-tool="paint"
-			>
-				<svg viewBox="0 0 24 24" width="18" height="18">
-					<path
-						d="M17.25 2.1C16.5 1.35 15.3 1.35 14.55 2.1L12.5 4.15 15.85 7.5 17.9 5.45C18.65 4.7 18.65 3.5 17.9 2.75L17.25 2.1M4 13.25V17h3.75L15.1 9.65 11.75 6.3 4 13.25z"
-						fill="currentColor"
-					/>
-				</svg>
-			</button>
-			<button
-				id="eraserBtn"
-				class="tool-btn"
-				title="Eraser Mode"
-				data-tool="eraser"
-			>
-				<svg viewBox="0 0 24 24" width="18" height="18">
-					<path
-						d="M16.24 3.56l4.95 4.94c.78.79.78 2.05 0 2.84L12 20.53a4.008 4.008 0 0 1-5.66 0L2.81 17c-.78-.79-.78-2.05 0-2.84l10.6-10.6c.79-.78 2.05-.78 2.83 0M4.22 15.58l3.54 3.53c.78.79 2.04.79 2.83 0l3.53-3.53l-4.95-4.95l-4.95 4.95z"
-						fill="currentColor"
-					/>
-				</svg>
-			</button>
-			<button
-				id="stickerBtn"
-				class="tool-btn"
-				title="Sticker Mode"
-				data-tool="sticker"
-			>
-				<svg viewBox="0 0 24 24" width="18" height="18">
-					<path
-						d="M5.5 2C3.56 2 2 3.56 2 5.5v13C2 20.44 3.56 22 5.5 22H16l6-6V5.5C22 3.56 20.44 2 18.5 2H5.5zm0 6h6.5v2H5.5V8zm0 4h3.5v2H5.5v-4z"
-						fill="currentColor"
-					/>
-				</svg>
-			</button>
-		</div>
-
-		<!-- Floating Brush Panel -->
-		<div class="floating-brush-panel" id="brush-controls">
-			<button class="panel-toggle-btn" id="brush-panel-toggle">×</button>
-			<div class="panel-header">
-				<span>Brush Settings</span>
-			</div>
-			<div class="panel-mini-controls">
-				<div class="mini-control" id="brush-size-mini">20px</div>
-				<div
-					class="mini-control"
-					id="brush-color-mini"
-					style="background: #ff0000; color: white"
-				>
-					●
-				</div>
-			</div>
-			<div class="control-group">
-				<label>Color</label>
-				<input
-					type="color"
-					id="brushColor"
-					value="#ff0000"
-					title="Brush Color"
-				/>
-				<div class="color-history" id="color-history">
-					<div class="color-history-header">Recent Colors</div>
-					<div class="color-history-grid" id="color-history-grid">
-						<!-- Recent colors will be added here -->
+				<div class="shortcuts-list">
+					<div class="shortcut-item">
+						<span class="shortcut-key">Space</span>
+						<span class="shortcut-desc">Rotate</span>
+					</div>
+					<div class="shortcut-item">
+						<span class="shortcut-key">B</span>
+						<span class="shortcut-desc">Brush</span>
+					</div>
+					<div class="shortcut-item">
+						<span class="shortcut-key">E</span>
+						<span class="shortcut-desc">Eraser</span>
+					</div>
+					<div class="shortcut-item">
+						<span class="shortcut-key">S</span>
+						<span class="shortcut-desc">Stickers</span>
 					</div>
 				</div>
 			</div>
-			<div class="control-group">
-				<label>Size: <span id="brushSizeValue">20</span>px [ ]</label>
-				<input type="range" id="brushSize" min="1" max="100" value="20" />
+
+			<!-- Floating Brush Panel -->
+			<div class="floating-brush-panel" id="brush-controls">
+				<button class="panel-toggle-btn" id="brush-panel-toggle">×</button>
+				<div class="panel-header">
+					<span>Brush Settings</span>
+				</div>
+				<div class="panel-mini-controls">
+					<div class="mini-control" id="brush-size-mini">20px</div>
+					<div
+						class="mini-control"
+						id="brush-color-mini"
+						style="background: #ff0000; color: white"
+					>
+						●
+					</div>
+				</div>
+				<div class="control-group">
+					<label>Color</label>
+					<input
+						type="color"
+						id="brushColor"
+						value="#ff0000"
+						title="Brush Color"
+					/>
+					<div class="color-history" id="color-history">
+						<div class="color-history-header">Recent Colors</div>
+						<div class="color-history-grid" id="color-history-grid">
+							<!-- Recent colors will be added here -->
+						</div>
+					</div>
+				</div>
+				<div class="control-group">
+					<label>Size: <span id="brushSizeValue">20</span>px [ ]</label>
+					<input type="range" id="brushSize" min="1" max="100" value="20" />
+				</div>
+				<div class="control-group">
+					<label>Opacity: <span id="brushOpacityValue">1.0</span></label>
+					<input
+						type="range"
+						id="brushOpacity"
+						min="0.05"
+						max="1"
+						step="0.05"
+						value="1"
+					/>
+				</div>
 			</div>
-			<div class="control-group">
-				<label>Opacity: <span id="brushOpacityValue">1.0</span></label>
-				<input
-					type="range"
-					id="brushOpacity"
-					min="0.05"
-					max="1"
-					step="0.05"
-					value="1"
-				/>
+
+			<!-- Floating Stickers Panel -->
+			<div class="floating-sticker-panel" id="sticker-panel">
+				<button class="panel-toggle-btn" id="sticker-panel-toggle">×</button>
+				<div class="panel-header">
+					<span>Stickers</span>
+				</div>
+				<div class="panel-mini-controls">
+					<div class="mini-control" id="sticker-size-mini">100px</div>
+				</div>
+				<div class="control-group">
+					<label>Size: <span id="stickerSizeValue">100</span>px</label>
+					<input
+						type="range"
+						id="stickerSize"
+						min="20"
+						max="200"
+						step="5"
+						value="100"
+					/>
+				</div>
+				<div class="sticker-grid" id="sticker-list">
+					<!-- Stickers will be dynamically loaded here -->
+				</div>
+			</div>
+
+			<!-- Floating Toggle Buttons (when panels are hidden) -->
+			<div class="floating-panel-toggle paint-toggle" id="paint-toggle">🎨</div>
+			<div class="floating-panel-toggle sticker-toggle" id="sticker-toggle">
+				🏷️
+			</div>
+
+			<!-- Mini-map Panel -->
+			<div class="floating-minimap-panel" id="minimap-panel">
+				<div class="panel-header">
+					<span>Paint Map</span>
+				</div>
+				<canvas id="minimap-canvas" width="120" height="120"></canvas>
+			</div>
+
+			<!-- Undo/Redo Panel -->
+			<div class="undo-redo-panel">
+				<button class="undo-btn" id="undo-btn" title="Undo">↶</button>
+				<button class="redo-btn" id="redo-btn" title="Redo">↷</button>
+			</div>
+
+			<div class="screen-actions">
+				<button id="back-to-base" class="btn-secondary">← Back</button>
+				<button id="next-to-pose" class="btn-primary">
+					Next: Pose & Finish →
+				</button>
 			</div>
 		</div>
 
-		<!-- Floating Stickers Panel -->
-		<div class="floating-sticker-panel" id="sticker-panel">
-			<button class="panel-toggle-btn" id="sticker-panel-toggle">×</button>
-			<div class="panel-header">
-				<span>Stickers</span>
+		<!-- SCREEN 3: Pose & Environment -->
+		<div id="screen-pose" class="screen-container">
+			<div class="screen-header">
+				<h2>🎭 Pose & Environment</h2>
+				<p>Select a pose, environment, and save your creation</p>
 			</div>
-			<div class="panel-mini-controls">
-				<div class="mini-control" id="sticker-size-mini">100px</div>
+
+			<!-- Pose Selection Toolbar -->
+			<div id="pose-toolbar" class="pose-toolbar">
+				<div class="toolbar-section">
+					<h3>Character Pose</h3>
+					<div class="pose-options">
+						<button
+							class="pose-btn active"
+							data-pose="frame-1"
+							title="Standing Pose"
+						>
+							<div class="pose-icon">🧍</div>
+							<span>Standing</span>
+						</button>
+						<button class="pose-btn" data-pose="frame-3" title="Action Pose">
+							<div class="pose-icon">🤸</div>
+							<span>Action</span>
+						</button>
+						<button class="pose-btn" data-pose="frame-10" title="Casual Pose">
+							<div class="pose-icon">🚶</div>
+							<span>Walking</span>
+						</button>
+					</div>
+				</div>
+
+				<div class="toolbar-section">
+					<h3>Environment</h3>
+					<div class="hdri-options">
+						<button
+							class="hdri-btn active"
+							data-hdri="studio"
+							title="Studio Lighting"
+						>
+							<div class="hdri-preview studio"></div>
+							<span>Studio</span>
+						</button>
+						<button
+							class="hdri-btn"
+							data-hdri="outdoor"
+							title="Outdoor Lighting"
+						>
+							<div class="hdri-preview outdoor"></div>
+							<span>Outdoor</span>
+						</button>
+						<button class="hdri-btn" data-hdri="sunset" title="Sunset Lighting">
+							<div class="hdri-preview sunset"></div>
+							<span>Sunset</span>
+						</button>
+					</div>
+				</div>
+
+				<div class="toolbar-section">
+					<h3>Camera Frame</h3>
+					<div class="camera-options">
+						<button
+							class="camera-btn active"
+							data-camera="portrait"
+							title="Portrait View"
+						>
+							<div class="camera-icon">📱</div>
+							<span>Portrait</span>
+						</button>
+						<button
+							class="camera-btn"
+							data-camera="landscape"
+							title="Landscape View"
+						>
+							<div class="camera-icon">📷</div>
+							<span>Landscape</span>
+						</button>
+						<button
+							class="camera-btn"
+							data-camera="close-up"
+							title="Close-up View"
+						>
+							<div class="camera-icon">🔍</div>
+							<span>Close-up</span>
+						</button>
+					</div>
+				</div>
 			</div>
-			<div class="control-group">
-				<label>Size: <span id="stickerSizeValue">100</span>px</label>
-				<input
-					type="range"
-					id="stickerSize"
-					min="20"
-					max="200"
-					step="5"
-					value="100"
-				/>
-			</div>
-			<div class="sticker-grid" id="sticker-list">
-				<!-- Stickers will be dynamically loaded here -->
+
+			<div class="screen-actions">
+				<button id="back-to-paint" class="btn-secondary">← Back</button>
+				<button id="save-creation" class="btn-finish">💾 Save Creation</button>
 			</div>
 		</div>
-
-		<!-- Floating Toggle Buttons (when panels are hidden) -->
-		<div class="floating-panel-toggle paint-toggle" id="paint-toggle">🎨</div>
-		<div class="floating-panel-toggle sticker-toggle" id="sticker-toggle">
-			🏷️
-		</div>
-
-		<!-- Mini-map Panel -->
-		<div class="floating-minimap-panel" id="minimap-panel">
-			<div class="panel-header">
-				<span>Paint Map</span>
-			</div>
-			<canvas id="minimap-canvas" width="120" height="120"></canvas>
-		</div>
-
-		<!-- Audio for recording -->
-		<audio id="recording-audio" src="./assets/audio.mp3" preload="auto"></audio>
 
 		<!-- Sound effects -->
 		<audio id="paint-sound" preload="auto">

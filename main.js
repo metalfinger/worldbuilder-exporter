@@ -3,10 +3,7 @@ import { setupScene } from "./modules/sceneSetup.js";
 import { loadModel, getCharacterTextures } from "./modules/modelManager.js";
 import { setupAnimation, getMixer } from "./modules/animationManager.js";
 import { setupUI, initializeMasks } from "./modules/uiManager.js";
-import {
-	setupRecording,
-	getRecordingMixer,
-} from "./modules/recordingManager.js";
+import { initializeScreenManager } from "./modules/screenManager.js";
 
 const clock = new THREE.Clock();
 
@@ -21,11 +18,11 @@ loadModel(scene, (model) => {
 	// 4. Animation Setup
 	const mixer = setupAnimation(model);
 
-	// 5. Recording Setup
-	setupRecording(renderer, scene, getCharacterTextures());
-
-	// Initialize masks after model and textures are loaded
+	// 5. Initialize masks after model and textures are loaded
 	initializeMasks();
+
+	// 6. Initialize Screen Manager
+	initializeScreenManager(scene, camera, renderer, controls, setMode);
 
 	// Start the animation loop once the model is loaded
 	animate(mixer);
@@ -37,15 +34,9 @@ function animate(mixer) {
 
 	const delta = clock.getDelta();
 
-	// Update the main mixer for the static model
+	// Update the main mixer for the model
 	if (mixer) {
 		mixer.update(delta);
-	}
-
-	// If recording, update the separate recording mixer
-	const recordingMixer = getRecordingMixer();
-	if (recordingMixer) {
-		recordingMixer.update(delta);
 	}
 
 	controls.update();
