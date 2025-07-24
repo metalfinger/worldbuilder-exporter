@@ -51,23 +51,24 @@ export function setupScene() {
 	// Initialize with studio lighting
 	setupStudioLighting();
 
-	// Ground Plane
-	const groundGeo = new THREE.PlaneGeometry(100, 100);
+	// Ground Platform (Box)
+	const groundGeo = new THREE.BoxGeometry(5, 0.5, 5); // Width, Height, Depth
 	const groundMat = new THREE.MeshStandardMaterial({
 		color: 0x808080,
 		roughness: 0.7,
 		metalness: 0.1,
 	});
 	const ground = new THREE.Mesh(groundGeo, groundMat);
-	ground.rotation.x = -Math.PI / 2;
+	ground.position.y = -0.25; // Position so top surface is at y=0
 	ground.receiveShadow = true;
+	ground.castShadow = true; // Box can also cast shadows
 	scene.add(ground);
 
 	const textureLoader = new THREE.TextureLoader();
 	textureLoader.load("./GLBandFBX/texture_08.png", function (texture) {
 		texture.wrapS = THREE.RepeatWrapping;
 		texture.wrapT = THREE.RepeatWrapping;
-		texture.repeat.set(100, 100);
+		texture.repeat.set(2, 2);
 		ground.material.map = texture;
 		ground.material.needsUpdate = true;
 	});
