@@ -52,26 +52,26 @@ export function setupScene() {
 	setupStudioLighting();
 
 	// Ground Platform (Box)
-	const groundGeo = new THREE.BoxGeometry(5, 0.5, 5); // Width, Height, Depth
-	const groundMat = new THREE.MeshStandardMaterial({
-		color: 0x808080,
-		roughness: 0.7,
-		metalness: 0.1,
-	});
-	const ground = new THREE.Mesh(groundGeo, groundMat);
-	ground.position.y = -0.25; // Position so top surface is at y=0
-	ground.receiveShadow = true;
-	ground.castShadow = true; // Box can also cast shadows
-	scene.add(ground);
+	// const groundGeo = new THREE.BoxGeometry(5, 0.5, 5); // Width, Height, Depth
+	// const groundMat = new THREE.MeshStandardMaterial({
+	// 	color: 0x808080,
+	// 	roughness: 0.7,
+	// 	metalness: 0.1,
+	// });
+	// const ground = new THREE.Mesh(groundGeo, groundMat);
+	// ground.position.y = -0.25; // Position so top surface is at y=0
+	// ground.receiveShadow = true;
+	// ground.castShadow = true; // Box can also cast shadows
+	// scene.add(ground);
 
-	const textureLoader = new THREE.TextureLoader();
-	textureLoader.load("./GLBandFBX/texture_08.png", function (texture) {
-		texture.wrapS = THREE.RepeatWrapping;
-		texture.wrapT = THREE.RepeatWrapping;
-		texture.repeat.set(2, 2);
-		ground.material.map = texture;
-		ground.material.needsUpdate = true;
-	});
+	// const textureLoader = new THREE.TextureLoader();
+	// textureLoader.load("./GLBandFBX/texture_08.png", function (texture) {
+	// 	texture.wrapS = THREE.RepeatWrapping;
+	// 	texture.wrapT = THREE.RepeatWrapping;
+	// 	texture.repeat.set(2, 2);
+	// 	ground.material.map = texture;
+	// 	ground.material.needsUpdate = true;
+	// });
 
 	// Set initial studio environment - force apply to ensure it loads
 	applyEnvironment("studio", true);
