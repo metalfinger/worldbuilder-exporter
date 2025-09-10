@@ -452,18 +452,44 @@ function saveCreation() {
 	}
 
 	try {
-		// Force multiple renders to ensure everything is properly displayed
-		console.log("Forcing render for screenshot...");
+		// Store original background and environment for restoration
+		const originalBackground = sceneRef.background;
+		const originalEnvironment = sceneRef.environment;
+		const originalToneMappingExposure = rendererRef.toneMappingExposure;
+		const originalClearColor = rendererRef.getClearColor(new THREE.Color());
+		const originalClearAlpha = rendererRef.getClearAlpha();
+
+		// Set transparent background for export
+		sceneRef.background = null;
+		sceneRef.environment = null;
+		rendererRef.toneMappingExposure = 1.0;
+		
+		// Set clear color to transparent
+		rendererRef.setClearColor(0x000000, 0); // Transparent background
+
+		// Force render with transparent background
+		console.log("Rendering with transparent background...");
 		rendererRef.render(sceneRef, cameraRef);
 
-		// Give more time for the render to complete
+		// Give time for the render to complete
 		setTimeout(() => {
 			// Render again to be absolutely sure
 			rendererRef.render(sceneRef, cameraRef);
 
 			// Wait a bit more before capture
 			setTimeout(() => {
+				// Capture screenshot with transparent background
 				captureAndDownloadScreenshot();
+
+				// Restore original background and environment after capture
+				setTimeout(() => {
+					sceneRef.background = originalBackground;
+					sceneRef.environment = originalEnvironment;
+					rendererRef.toneMappingExposure = originalToneMappingExposure;
+					rendererRef.setClearColor(originalClearColor, originalClearAlpha);
+					rendererRef.render(sceneRef, cameraRef);
+					console.log("Restored original environment");
+				}, 100);
 			}, 200);
 		}, 200);
 	} catch (error) {

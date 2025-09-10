@@ -190,36 +190,6 @@
 				</button>
 			</div>
 
-			<!-- Single Responsive Layers Panel -->
-			<div class="floating-layers-panel">
-				<div class="layer-list">
-					<div
-						class="layer-item active"
-						id="layer-none"
-						title="Paint/Erase on Full Body"
-					>
-						<div class="layer-icon">🌐</div>
-						<div class="layer-name">Full Body</div>
-					</div>
-					<div
-						class="layer-item"
-						id="layer-head"
-						title="Paint/Erase Head Area Only"
-					>
-						<div class="layer-icon">👤</div>
-						<div class="layer-name">Head Only</div>
-					</div>
-					<div
-						class="layer-item"
-						id="layer-jacket"
-						title="Paint/Erase Jacket Area Only"
-					>
-						<div class="layer-icon">👔</div>
-						<div class="layer-name">Jacket Only</div>
-					</div>
-				</div>
-			</div>
-
 			<!-- Floating Keyboard Shortcuts Panel -->
 			<div class="floating-shortcuts-panel" id="shortcuts-panel">
 				<div class="panel-header">
@@ -324,14 +294,6 @@
 				🏷️
 			</div>
 
-			<!-- Mini-map Panel -->
-			<div class="floating-minimap-panel" id="minimap-panel">
-				<div class="panel-header">
-					<span>Paint Map</span>
-				</div>
-				<canvas id="minimap-canvas" width="120" height="120"></canvas>
-			</div>
-
 			<!-- Undo/Redo Panel -->
 			<div class="undo-redo-panel">
 				<button class="undo-btn" id="undo-btn" title="Undo">↶</button>
@@ -349,34 +311,12 @@
 		<!-- SCREEN 3: Pose & Environment -->
 		<div id="screen-pose" class="screen-container">
 			<div class="screen-header">
-				<h2>🎭 Pose & Environment</h2>
-				<p>Select a pose, environment, and save your creation</p>
+				<h2>🌍 Environment</h2>
+				<p>Select an environment and save your creation</p>
 			</div>
 
-			<!-- Pose Selection Toolbar -->
+			<!-- Environment Selection Toolbar -->
 			<div id="pose-toolbar" class="pose-toolbar">
-				<div class="toolbar-section">
-					<h3>Character Pose</h3>
-					<div class="pose-options">
-						<button
-							class="pose-btn active"
-							data-pose="frame-1"
-							title="Standing Pose"
-						>
-							<div class="pose-icon">🧍</div>
-							<span>Standing</span>
-						</button>
-						<button class="pose-btn" data-pose="frame-3" title="Action Pose">
-							<div class="pose-icon">🤸</div>
-							<span>Action</span>
-						</button>
-						<button class="pose-btn" data-pose="frame-10" title="Casual Pose">
-							<div class="pose-icon">🚶</div>
-							<span>Walking</span>
-						</button>
-					</div>
-				</div>
-
 				<div class="toolbar-section">
 					<h3>Environment</h3>
 					<div class="hdri-options">
@@ -400,35 +340,29 @@
 							<div class="hdri-preview sunset"></div>
 							<span>Sunset</span>
 						</button>
-					</div>
-				</div>
-
-				<div class="toolbar-section">
-					<h3>Camera Frame</h3>
-					<div class="camera-options">
-						<button
-							class="camera-btn active"
-							data-camera="portrait"
-							title="Portrait View"
-						>
-							<div class="camera-icon">📱</div>
-							<span>Portrait</span>
+						<button class="hdri-btn" data-hdri="night" title="Night Lighting">
+							<div class="hdri-preview night"></div>
+							<span>Night</span>
 						</button>
-						<button
-							class="camera-btn"
-							data-camera="landscape"
-							title="Landscape View"
-						>
-							<div class="camera-icon">📷</div>
-							<span>Landscape</span>
+						<button class="hdri-btn" data-hdri="forest" title="Forest Lighting">
+							<div class="hdri-preview forest"></div>
+							<span>Forest</span>
 						</button>
-						<button
-							class="camera-btn"
-							data-camera="close-up"
-							title="Close-up View"
-						>
-							<div class="camera-icon">🔍</div>
-							<span>Close-up</span>
+						<button class="hdri-btn" data-hdri="beach" title="Beach Lighting">
+							<div class="hdri-preview beach"></div>
+							<span>Beach</span>
+						</button>
+						<button class="hdri-btn" data-hdri="dawn" title="Dawn Lighting">
+							<div class="hdri-preview dawn"></div>
+							<span>Dawn</span>
+						</button>
+						<button class="hdri-btn" data-hdri="cloudy" title="Cloudy Lighting">
+							<div class="hdri-preview cloudy"></div>
+							<span>Cloudy</span>
+						</button>
+						<button class="hdri-btn" data-hdri="indoor" title="Indoor Lighting">
+							<div class="hdri-preview indoor"></div>
+							<span>Indoor</span>
 						</button>
 					</div>
 				</div>

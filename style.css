@@ -2707,6 +2707,30 @@ body[data-screen="paint"] #screen-paint .undo-redo-panel {
 	background: linear-gradient(135deg, #ff6b35, #f7931e);
 }
 
+.hdri-preview.night {
+	background: linear-gradient(135deg, #0c1445, #1a237e);
+}
+
+.hdri-preview.forest {
+	background: linear-gradient(135deg, #1b5e20, #4caf50);
+}
+
+.hdri-preview.beach {
+	background: linear-gradient(135deg, #f57f17, #fff176);
+}
+
+.hdri-preview.dawn {
+	background: linear-gradient(135deg, #e1bee7, #ff80ab);
+}
+
+.hdri-preview.cloudy {
+	background: linear-gradient(135deg, #90a4ae, #cfd8dc);
+}
+
+.hdri-preview.indoor {
+	background: linear-gradient(135deg, #757575, #bdbdbd);
+}
+
 .pose-btn span,
 .hdri-btn span,
 .camera-btn span {

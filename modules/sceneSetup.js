@@ -25,6 +25,7 @@ export function setupScene() {
 	renderer = new THREE.WebGLRenderer({
 		antialias: true,
 		preserveDrawingBuffer: true, // Essential for capturing screenshots
+		alpha: true, // Enable alpha for transparent backgrounds
 	});
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	renderer.setPixelRatio(window.devicePixelRatio);
@@ -224,6 +225,150 @@ function setupSunsetLighting() {
 	scene.add(fillLight);
 }
 
+function setupNightLighting() {
+	// Clear existing lights
+	if (hemisphereLight) scene.remove(hemisphereLight);
+	if (directionalLight) scene.remove(directionalLight);
+	if (fillLight) scene.remove(fillLight);
+
+	// Night lighting - dark with moonlight
+	hemisphereLight = new THREE.HemisphereLight(0x1a237e, 0x0c1445, 0.3);
+	scene.add(hemisphereLight);
+
+	// Moonlight - soft directional light from above
+	directionalLight = new THREE.DirectionalLight(0x7f9cf5, 0.8);
+	directionalLight.position.set(0, 5, -2);
+	directionalLight.castShadow = true;
+	directionalLight.shadow.mapSize.width = 2048;
+	directionalLight.shadow.mapSize.height = 2048;
+	scene.add(directionalLight);
+
+	// Ambient light for visibility
+	fillLight = new THREE.DirectionalLight(0x4a5cb0, 0.2);
+	fillLight.position.set(2, 1, 2);
+	scene.add(fillLight);
+}
+
+function setupForestLighting() {
+	// Clear existing lights
+	if (hemisphereLight) scene.remove(hemisphereLight);
+	if (directionalLight) scene.remove(directionalLight);
+	if (fillLight) scene.remove(fillLight);
+
+	// Forest lighting - green-tinted ambient
+	hemisphereLight = new THREE.HemisphereLight(0x4caf50, 0x1b5e20, 0.6);
+	scene.add(hemisphereLight);
+
+	// Sunlight filtering through trees
+	directionalLight = new THREE.DirectionalLight(0x81c784, 1.0);
+	directionalLight.position.set(3, 4, 2);
+	directionalLight.castShadow = true;
+	directionalLight.shadow.mapSize.width = 2048;
+	directionalLight.shadow.mapSize.height = 2048;
+	scene.add(directionalLight);
+
+	// Fill light from environment
+	fillLight = new THREE.DirectionalLight(0x66bb6a, 0.3);
+	fillLight.position.set(-2, 2, -1);
+	scene.add(fillLight);
+}
+
+function setupBeachLighting() {
+	// Clear existing lights
+	if (hemisphereLight) scene.remove(hemisphereLight);
+	if (directionalLight) scene.remove(directionalLight);
+	if (fillLight) scene.remove(fillLight);
+
+	// Beach lighting - warm ambient
+	hemisphereLight = new THREE.HemisphereLight(0xfff176, 0xf57f17, 0.7);
+	scene.add(hemisphereLight);
+
+	// Bright sunlight
+	directionalLight = new THREE.DirectionalLight(0xffffff, 1.3);
+	directionalLight.position.set(4, 5, 3);
+	directionalLight.castShadow = true;
+	directionalLight.shadow.mapSize.width = 2048;
+	directionalLight.shadow.mapSize.height = 2048;
+	scene.add(directionalLight);
+
+	// Sky reflection
+	fillLight = new THREE.DirectionalLight(0xfff59d, 0.4);
+	fillLight.position.set(-2, 3, -2);
+	scene.add(fillLight);
+}
+
+function setupDawnLighting() {
+	// Clear existing lights
+	if (hemisphereLight) scene.remove(hemisphereLight);
+	if (directionalLight) scene.remove(directionalLight);
+	if (fillLight) scene.remove(fillLight);
+
+	// Dawn lighting - soft purple/pink ambient
+	hemisphereLight = new THREE.HemisphereLight(0xff80ab, 0xe1bee7, 0.5);
+	scene.add(hemisphereLight);
+
+	// Rising sun
+	directionalLight = new THREE.DirectionalLight(0xffccbc, 1.0);
+	directionalLight.position.set(2, 3, 4);
+	directionalLight.castShadow = true;
+	directionalLight.shadow.mapSize.width = 2048;
+	directionalLight.shadow.mapSize.height = 2048;
+	scene.add(directionalLight);
+
+	// Soft fill light
+	fillLight = new THREE.DirectionalLight(0xf8bbd0, 0.3);
+	fillLight.position.set(-1, 2, -1);
+	scene.add(fillLight);
+}
+
+function setupCloudyLighting() {
+	// Clear existing lights
+	if (hemisphereLight) scene.remove(hemisphereLight);
+	if (directionalLight) scene.remove(directionalLight);
+	if (fillLight) scene.remove(fillLight);
+
+	// Cloudy lighting - neutral ambient
+	hemisphereLight = new THREE.HemisphereLight(0xcfd8dc, 0x90a4ae, 0.8);
+	scene.add(hemisphereLight);
+
+	// Diffused sunlight
+	directionalLight = new THREE.DirectionalLight(0xffffff, 0.9);
+	directionalLight.position.set(2, 4, 3);
+	directionalLight.castShadow = true;
+	directionalLight.shadow.mapSize.width = 2048;
+	directionalLight.shadow.mapSize.height = 2048;
+	scene.add(directionalLight);
+
+	// Soft fill
+	fillLight = new THREE.DirectionalLight(0xb0bec5, 0.2);
+	fillLight.position.set(-2, 2, -1);
+	scene.add(fillLight);
+}
+
+function setupIndoorLighting() {
+	// Clear existing lights
+	if (hemisphereLight) scene.remove(hemisphereLight);
+	if (directionalLight) scene.remove(directionalLight);
+	if (fillLight) scene.remove(fillLight);
+
+	// Indoor lighting - neutral with slight warmth
+	hemisphereLight = new THREE.HemisphereLight(0xe0e0e0, 0x9e9e9e, 0.6);
+	scene.add(hemisphereLight);
+
+	// Overhead lighting
+	directionalLight = new THREE.DirectionalLight(0xffffff, 1.1);
+	directionalLight.position.set(0, 5, 2);
+	directionalLight.castShadow = true;
+	directionalLight.shadow.mapSize.width = 2048;
+	directionalLight.shadow.mapSize.height = 2048;
+	scene.add(directionalLight);
+
+	// Ambient fill
+	fillLight = new THREE.DirectionalLight(0xeeeeee, 0.3);
+	fillLight.position.set(2, 1, -2);
+	scene.add(fillLight);
+}
+
 function loadStudioHDRI(callback) {
 	if (studioHDRI) {
 		console.log("Using cached studio HDRI");
@@ -244,10 +389,10 @@ function loadStudioHDRI(callback) {
 			callback(texture);
 		},
 		function (progress) {
-			console.log(
-				"HDRI loading progress:",
-				(progress.loaded / progress.total) * 100 + "%"
-			);
+			// console.log(
+			// 	"HDRI loading progress:",
+			// 	(progress.loaded / progress.total) * 100 + "%"
+			// );
 		},
 		function (error) {
 			console.error("❌ Failed to load studio HDRI:", error);
@@ -321,6 +466,72 @@ export function applyEnvironment(environmentType, forceApply = false) {
 			renderer.toneMappingExposure = 0.9; // Reduced from 1.2
 			console.log(
 				"🌅 Sunset environment applied with tone mapping:",
+				renderer.toneMappingExposure
+			);
+			break;
+
+		case "night":
+			scene.background = new THREE.Color(0x0c1445); // Dark blue background
+			scene.environment = null; // Remove environment to rely on lighting
+			setupNightLighting();
+			renderer.toneMappingExposure = 0.6;
+			console.log(
+				"🌙 Night environment applied with tone mapping:",
+				renderer.toneMappingExposure
+			);
+			break;
+
+		case "forest":
+			scene.background = new THREE.Color(0x1b5e20); // Dark green background
+			scene.environment = null; // Remove environment to rely on lighting
+			setupForestLighting();
+			renderer.toneMappingExposure = 0.8;
+			console.log(
+				"🌲 Forest environment applied with tone mapping:",
+				renderer.toneMappingExposure
+			);
+			break;
+
+		case "beach":
+			scene.background = new THREE.Color(0xf57f17); // Sandy color background
+			scene.environment = null; // Remove environment to rely on lighting
+			setupBeachLighting();
+			renderer.toneMappingExposure = 1.0;
+			console.log(
+				"🏖️ Beach environment applied with tone mapping:",
+				renderer.toneMappingExposure
+			);
+			break;
+
+		case "dawn":
+			scene.background = new THREE.Color(0xe1bee7); // Soft purple background
+			scene.environment = null; // Remove environment to rely on lighting
+			setupDawnLighting();
+			renderer.toneMappingExposure = 0.8;
+			console.log(
+				"🌅 Dawn environment applied with tone mapping:",
+				renderer.toneMappingExposure
+			);
+			break;
+
+		case "cloudy":
+			scene.background = new THREE.Color(0x90a4ae); // Gray background
+			scene.environment = null; // Remove environment to rely on lighting
+			setupCloudyLighting();
+			renderer.toneMappingExposure = 0.7;
+			console.log(
+				"☁️ Cloudy environment applied with tone mapping:",
+				renderer.toneMappingExposure
+			);
+			break;
+
+		case "indoor":
+			scene.background = new THREE.Color(0x9e9e9e); // Neutral gray background
+			scene.environment = null; // Remove environment to rely on lighting
+			setupIndoorLighting();
+			renderer.toneMappingExposure = 0.8;
+			console.log(
+				"🏠 Indoor environment applied with tone mapping:",
 				renderer.toneMappingExposure
 			);
 			break;

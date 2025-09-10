@@ -1198,7 +1198,7 @@ export function setupUI(camera, renderer, controls) {
 	eraserIndicatorElement = document.getElementById("eraser2dIndicator");
 	stickerPreviewElement = document.getElementById("sticker-preview");
 
-	// Layer panel elements
+	// Layer panel elements (may not exist if panels were removed)
 	const layerNone = document.getElementById("layer-none");
 	const layerHead = document.getElementById("layer-head");
 	const layerJacket = document.getElementById("layer-jacket");
@@ -1226,17 +1226,17 @@ export function setupUI(camera, renderer, controls) {
 	}
 
 	function updateLayerUI() {
-		// Remove active class from all layers
-		layerNone.classList.remove("active");
-		layerHead.classList.remove("active");
-		layerJacket.classList.remove("active");
+		// Remove active class from all layers (only if elements exist)
+		if (layerNone) layerNone.classList.remove("active");
+		if (layerHead) layerHead.classList.remove("active");
+		if (layerJacket) layerJacket.classList.remove("active");
 
-		// Add active class to current layer
-		if (activeMask === "none") {
+		// Add active class to current layer (only if elements exist)
+		if (activeMask === "none" && layerNone) {
 			layerNone.classList.add("active");
-		} else if (activeMask === "head") {
+		} else if (activeMask === "head" && layerHead) {
 			layerHead.classList.add("active");
-		} else if (activeMask === "jacket") {
+		} else if (activeMask === "jacket" && layerJacket) {
 			layerJacket.classList.add("active");
 		}
 	}
@@ -1577,25 +1577,31 @@ export function setupUI(camera, renderer, controls) {
 	// Set initial mode
 	setMode("rotate");
 
-	// Enhanced layer panel event listeners
-	layerNone.addEventListener("click", () => {
-		setActiveMask("none");
-		showNotification("Full Body selected - paint anywhere on model", "success");
-	});
-	layerHead.addEventListener("click", () => {
-		setActiveMask("head");
-		showNotification(
-			"Head Only selected - painting restricted to head area",
-			"success"
-		);
-	});
-	layerJacket.addEventListener("click", () => {
-		setActiveMask("jacket");
-		showNotification(
-			"Jacket Only selected - painting restricted to jacket area",
-			"success"
-		);
-	});
+	// Enhanced layer panel event listeners (only if elements exist)
+	if (layerNone) {
+		layerNone.addEventListener("click", () => {
+			setActiveMask("none");
+			showNotification("Full Body selected - paint anywhere on model", "success");
+		});
+	}
+	if (layerHead) {
+		layerHead.addEventListener("click", () => {
+			setActiveMask("head");
+			showNotification(
+				"Head Only selected - painting restricted to head area",
+				"success"
+			);
+		});
+	}
+	if (layerJacket) {
+		layerJacket.addEventListener("click", () => {
+			setActiveMask("jacket");
+			showNotification(
+				"Jacket Only selected - painting restricted to jacket area",
+				"success"
+			);
+		});
+	}
 
 	function loadStickers() {
 		const textureLoader = new THREE.TextureLoader();
