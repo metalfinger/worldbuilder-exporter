@@ -136,16 +136,22 @@ body {
 	transform: translateX(-50%) translateY(-2px);
 }
 
-/* Left Toolbar */
+/* Left Toolbar - Centered vertically on left side */
 .floating-toolbar {
 	position: fixed;
-	top: var(--spacing-lg);
+	top: 50%;
 	left: var(--spacing-lg);
+	transform: translateY(-50%);
 	display: flex;
 	flex-direction: column;
 	gap: var(--spacing-sm);
 	padding: var(--spacing-md);
 	z-index: 1100;
+	background: var(--glass-bg);
+	backdrop-filter: var(--glass-blur);
+	border: 1px solid var(--glass-border);
+	border-radius: var(--border-radius);
+	box-shadow: var(--glass-shadow);
 }
 
 /* Right Layers Panel */
@@ -221,12 +227,18 @@ body {
 .floating-brush-panel,
 .floating-sticker-panel {
 	position: fixed;
-	bottom: var(--spacing-lg);
-	left: var(--spacing-lg);
+	top: 50%;
+	right: var(--spacing-lg);
+	transform: translateY(-50%);
 	width: 280px;
 	padding: var(--spacing-lg);
 	display: none;
 	z-index: 90;
+	background: var(--glass-bg);
+	backdrop-filter: var(--glass-blur);
+	border: 1px solid var(--glass-border);
+	border-radius: var(--border-radius);
+	box-shadow: var(--glass-shadow);
 }
 
 /* Top Right Minimap */
@@ -1338,22 +1350,20 @@ body[data-mode="record"] #sticker-preview {
 		font-size: 10px;
 	}
 
-	/* Top-aligned toolbar for mobile */
+	/* Top-aligned toolbar for mobile - centered vertically */
 	.floating-toolbar {
 		position: fixed;
+		top: 50%;
 		left: var(--spacing-lg);
-		right: auto;
-		bottom: auto;
-		top: var(--spacing-lg);
-		transform: none;
+		transform: translateY(-50%);
 		flex-direction: column;
-		justify-content: flex-start;
+		justify-content: center;
 		align-items: center;
 		width: auto;
 		padding: var(--spacing-md);
 		border-radius: var(--border-radius);
 		background: var(--glass-bg);
-		backdrop-filter: var(--glass-blur);
+		backdrop-filter: blur(20px);
 		border: 1px solid var(--glass-border);
 		z-index: 100;
 		display: flex !important;
@@ -1376,20 +1386,9 @@ body[data-mode="record"] #sticker-preview {
 		height: 18px;
 	}
 
-	/* Mobile: Position layers panel in top bar area */
+	/* Mobile: Position layers panel in top bar area - but we've removed it */
 	.floating-layers-panel {
-		position: absolute;
-		top: 100%; /* Below the top bar */
-		left: 50%;
-		transform: translateX(-50%);
-		background: transparent;
-		border: none;
-		padding: 0;
-		margin: 8px auto 0;
-		opacity: 1;
-		pointer-events: auto;
-		z-index: auto;
-		width: auto;
+		display: none !important;
 	}
 
 	/* Show layers in paint, eraser, and sticker modes - now in top bar */
@@ -1407,16 +1406,11 @@ body[data-mode="record"] #sticker-preview {
 	/* Layers panel positioned responsively via media queries below */
 
 	.layer-list {
-		flex-direction: row;
-		gap: 6px;
-		align-items: center;
+		display: none !important;
 	}
 
 	.layer-item {
-		width: 36px;
-		height: 36px;
-		padding: 4px;
-		border-radius: 8px;
+		display: none !important;
 	}
 
 	.layer-icon {
@@ -1428,33 +1422,31 @@ body[data-mode="record"] #sticker-preview {
 		display: none;
 	}
 
-	/* Compact slide-up panels - smaller and more efficient */
+	/* Compact slide-up panels - but keep them on right side for mobile too */
 	.floating-brush-panel,
 	.floating-sticker-panel {
 		position: fixed;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		width: 100%;
-		border-radius: 16px 16px 0 0;
-		transform: translateY(100%); /* Closed by default */
-		transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-		padding: 12px;
-		padding-bottom: 80px; /* Space for toolbar */
-		background: rgba(10, 10, 10, 0.95);
+		top: 50%;
+		right: var(--spacing-lg);
+		transform: translateY(-50%);
+		width: 90%;
+		max-width: 280px;
+		border-radius: var(--border-radius);
+		padding: var(--spacing-md);
+		background: var(--glass-bg);
 		backdrop-filter: blur(20px);
+		border: 1px solid var(--glass-border);
 		z-index: 95;
-		max-height: 50vh; /* Reduced height */
+		max-height: 70vh;
 		overflow-y: auto;
-		box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.6);
-		display: none; /* Hidden by default */
+		box-shadow: var(--glass-shadow);
+		display: none;
 	}
 
-	/* Show panels only when mode is active AND not collapsed */
-	body[data-mode="paint"] .floating-brush-panel:not(.panel-closed),
-	body[data-mode="sticker"] .floating-sticker-panel:not(.panel-closed),
-	body[data-mode="eraser"] .floating-brush-panel:not(.panel-closed) {
-		transform: translateY(0);
+	/* Show panels only when mode is active */
+	body[data-mode="paint"] .floating-brush-panel,
+	body[data-mode="sticker"] .floating-sticker-panel,
+	body[data-mode="eraser"] .floating-brush-panel {
 		display: block !important;
 	}
 
@@ -1902,12 +1894,12 @@ body[data-mode="record"] #sticker-preview {
 		white-space: nowrap;
 	}
 
-	/* Reset toolbar to desktop positioning */
+	/* Reset toolbar to desktop positioning - centered vertically */
 	.floating-toolbar {
 		position: fixed;
-		top: var(--spacing-lg);
+		top: 50%;
 		left: var(--spacing-lg);
-		/* transform: translateY(-50%); */
+		transform: translateY(-50%);
 		display: flex;
 		flex-direction: column;
 		gap: var(--spacing-sm);
@@ -1917,6 +1909,8 @@ body[data-mode="record"] #sticker-preview {
 		border-radius: var(--border-radius);
 		background: var(--glass-bg);
 		border: 1px solid var(--glass-border);
+		box-shadow: var(--glass-shadow);
+		z-index: 1100;
 	}
 
 	.tool-btn {
@@ -1932,53 +1926,17 @@ body[data-mode="record"] #sticker-preview {
 		height: 18px;
 	}
 
-	/* Desktop: Reset layers panel to floating right side positioning */
+	/* Desktop: Reset layers panel to floating right side positioning - but we've removed it */
 	.floating-layers-panel {
-		position: fixed !important;
-		top: 50% !important;
-		right: var(--spacing-lg) !important;
-		transform: translateY(-50%) !important;
-		width: 120px; /* Wider to accommodate icon + text layout */
-		padding: var(--spacing-md);
-		flex-direction: column;
-		gap: var(--spacing-sm);
-		background: var(--glass-bg);
-		border-radius: var(--border-radius);
-		opacity: 1;
-		pointer-events: auto;
-		margin: 0;
-		border: 1px solid var(--glass-border);
-		z-index: 100;
-		display: block !important;
-	}
-
-	/* Show layers panel in all modes except record on desktop */
-	body[data-mode="paint"] .floating-layers-panel,
-	body[data-mode="eraser"] .floating-layers-panel,
-	body[data-mode="sticker"] .floating-layers-panel,
-	body[data-mode="rotate"] .floating-layers-panel {
-		display: block !important;
-	}
-
-	/* Hide layers panel in record mode on desktop */
-	body[data-mode="record"] .floating-layers-panel {
 		display: none !important;
 	}
 
 	.layer-list {
-		flex-direction: column;
-		gap: var(--spacing-sm);
+		display: none !important;
 	}
 
 	.layer-item {
-		width: auto;
-		height: auto;
-		padding: var(--spacing-sm);
-		border-radius: var(--border-radius-small);
-		display: flex; /* Use flexbox for horizontal layout */
-		align-items: center;
-		gap: 8px; /* Space between icon and text */
-		text-align: left; /* Left align text */
+		display: none !important;
 	}
 
 	.layer-icon {
@@ -2218,22 +2176,20 @@ body[data-mode="record"] #sticker-preview {
 		display: flex;
 	}
 
-	/* Reset brush/sticker panels to desktop positioning */
+	/* Reset brush/sticker panels to desktop positioning - centered vertically on right */
 	.floating-brush-panel,
 	.floating-sticker-panel {
 		position: fixed;
-		bottom: var(--spacing-lg);
-		left: var(--spacing-lg);
+		top: 50%;
+		right: var(--spacing-lg);
+		transform: translateY(-50%);
 		width: 280px;
 		padding: var(--spacing-lg);
 		border-radius: var(--border-radius);
-		transform: none;
 		background: var(--glass-bg);
-		max-height: none;
-		overflow: visible;
-		display: none; /* Hidden by default, shown by mode */
-		border: 1px solid var(--glass-border); /* Restore desktop border */
-		z-index: 200; /* Higher than layers panel */
+		border: 1px solid var(--glass-border);
+		box-shadow: var(--glass-shadow);
+		z-index: 200;
 	}
 
 	/* Hide mobile-specific elements on desktop */
