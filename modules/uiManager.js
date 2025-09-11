@@ -274,10 +274,15 @@ function handleMouseMoveThrottled(clientX, clientY) {
 // Undo/Redo System
 function saveState() {
 	const { paintCanvas } = getPaintCanvas();
-	if (!paintCanvas) return;
+	console.log("saveState called, paintCanvas:", paintCanvas);
+	if (!paintCanvas) {
+		console.log("No paintCanvas available, returning");
+		return;
+	}
 
 	const imageData = paintCanvas.toDataURL();
 	undoStack.push(imageData);
+	console.log("State saved to undo stack. Stack length:", undoStack.length);
 
 	// Limit undo stack to 20 states for memory management
 	if (undoStack.length > 20) {
@@ -391,11 +396,23 @@ function updateUndoRedoButtons() {
 	const undoBtn = document.getElementById("undo-btn");
 	const redoBtn = document.getElementById("redo-btn");
 
+	console.log("updateUndoRedoButtons called");
+	console.log("undoStack.length:", undoStack.length);
+	console.log("redoStack.length:", redoStack.length);
+	console.log("undoBtn element:", undoBtn);
+	console.log("redoBtn element:", redoBtn);
+
 	const undoDisabled = undoStack.length === 0;
 	const redoDisabled = redoStack.length === 0;
 
-	if (undoBtn) undoBtn.disabled = undoDisabled;
-	if (redoBtn) redoBtn.disabled = redoDisabled;
+	if (undoBtn) {
+		undoBtn.disabled = undoDisabled;
+		console.log("Undo button disabled:", undoDisabled);
+	}
+	if (redoBtn) {
+		redoBtn.disabled = redoDisabled;
+		console.log("Redo button disabled:", redoDisabled);
+	}
 }
 
 // Color History System
@@ -678,6 +695,13 @@ export function initializeMasks() {
 	// Load saved work and color history
 	loadWorkFromStorage();
 	loadColorHistoryFromStorage();
+
+	// Save initial canvas state for undo functionality
+	// This ensures the undo button works even after the first paint stroke
+	setTimeout(() => {
+		saveState();
+		console.log("Initial canvas state saved for undo/redo");
+	}, 1000); // Wait a bit for canvas to be fully loaded
 
 	// Initialize first auto-save
 	setTimeout(saveWorkToStorage, 5000);
@@ -1206,23 +1230,16 @@ export function setupUI(camera, renderer, controls) {
 	// Initialize sound
 	paintSound = document.getElementById("paint-sound");
 
-	// Create undo/redo panel
-	createUndoRedoPanel();
-
-	function createUndoRedoPanel() {
-		const panel = document.createElement("div");
-		panel.className = "undo-redo-panel";
-		panel.innerHTML = `
-			<button id="undo-btn" class="undo-btn" title="Undo (Ctrl+Z)" disabled>↶</button>
-			<button id="redo-btn" class="redo-btn" title="Redo (Ctrl+Y)" disabled>↷</button>
-		`;
-		document.body.appendChild(panel);
-
-		// Add event listeners for floating panel buttons
-		const undoBtn = document.getElementById("undo-btn");
-		const redoBtn = document.getElementById("redo-btn");
-		if (undoBtn) undoBtn.addEventListener("click", undo);
-		if (redoBtn) redoBtn.addEventListener("click", redo);
+	// Add event listeners to existing undo/redo buttons
+	const undoBtn = document.getElementById("undo-btn");
+	const redoBtn = document.getElementById("redo-btn");
+	if (undoBtn) {
+		undoBtn.addEventListener("click", undo);
+		console.log("Undo button event listener added");
+	}
+	if (redoBtn) {
+		redoBtn.addEventListener("click", redo);
+		console.log("Redo button event listener added");
 	}
 
 	function updateLayerUI() {
@@ -1510,6 +1527,26 @@ export function setupUI(camera, renderer, controls) {
 		if (e.key === "Shift") isShiftPressed = true;
 		if (e.ctrlKey) isCtrlPressed = true;
 
+		// Global shortcuts that work on any screen
+		if (e.ctrlKey || e.metaKey) {
+			switch (e.key.toLowerCase()) {
+				case "z": // Ctrl+Z for undo
+					e.preventDefault();
+					if (e.shiftKey) {
+						// Ctrl+Shift+Z for redo
+						redo();
+					} else {
+						// Ctrl+Z for undo
+						undo();
+					}
+					break;
+				case "y": // Ctrl+Y for redo
+					e.preventDefault();
+					redo();
+					break;
+			}
+		}
+
 		// Tool shortcuts - only work on paint screen (screen 2)
 		const currentScreen = document.body.getAttribute("data-screen");
 		if (currentScreen === "paint" && !e.repeat) {
@@ -1581,7 +1618,10 @@ export function setupUI(camera, renderer, controls) {
 	if (layerNone) {
 		layerNone.addEventListener("click", () => {
 			setActiveMask("none");
-			showNotification("Full Body selected - paint anywhere on model", "success");
+			showNotification(
+				"Full Body selected - paint anywhere on model",
+				"success"
+			);
 		});
 	}
 	if (layerHead) {
@@ -1794,6 +1834,9 @@ export function setupUI(camera, renderer, controls) {
 
 	// Set initial layer state to ensure proper initialization
 	setActiveMask("none");
+
+	// Initialize undo/redo button states
+	updateUndoRedoButtons();
 
 	// Show welcome message
 	setTimeout(() => {

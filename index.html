@@ -8,6 +8,12 @@
 			rel="icon"
 			href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌎</text></svg>"
 		/>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Bungee+Tint&family=Sixtyfour+Convergence&display=swap"
+			rel="stylesheet"
+		/>
 		<link rel="stylesheet" href="style.css" />
 	</head>
 	<body data-screen="base-color">
@@ -142,13 +148,13 @@
 					title="Rotate Mode"
 					data-tool="rotate"
 				>
-					<svg viewBox="0 0 24 24" width="24" height="24">
+					<svg class="tool-btn-svg" viewBox="0 0 24 24" width="24" height="24">
 						<path
 							d="M11 6.5V2h2v4.5h-2zm6.5 4.5H22v2h-4.5v-2zm-11 0H2v2h4.5v-2zM11 17.5V22h2v-4.5h-2zM8 12c0-2.21 1.79-4 4-4s4 1.79 4 4-1.79 4-4 4-4-1.79-4-4z"
 							fill="currentColor"
 						/>
 					</svg>
-					<span class="tool-label">Rotate</span>
+					<span class="tool-label">ROTATE</span>
 				</button>
 				<button
 					id="paintBtn"
@@ -156,13 +162,13 @@
 					title="Paint Mode"
 					data-tool="paint"
 				>
-					<svg viewBox="0 0 24 24" width="24" height="24">
+					<svg class="tool-btn-svg" viewBox="0 0 24 24" width="24" height="24">
 						<path
 							d="M17.25 2.1C16.5 1.35 15.3 1.35 14.55 2.1L12.5 4.15 15.85 7.5 17.9 5.45C18.65 4.7 18.65 3.5 17.9 2.75L17.25 2.1M4 13.25V17h3.75L15.1 9.65 11.75 6.3 4 13.25z"
 							fill="currentColor"
 						/>
 					</svg>
-					<span class="tool-label">Paint</span>
+					<span class="tool-label">PAINT</span>
 				</button>
 				<button
 					id="eraserBtn"
@@ -170,13 +176,13 @@
 					title="Eraser Mode"
 					data-tool="eraser"
 				>
-					<svg viewBox="0 0 24 24" width="24" height="24">
+					<svg class="tool-btn-svg" viewBox="0 0 24 24" width="24" height="24">
 						<path
 							d="M16.24 3.56l4.95 4.94c.78.79.78 2.05 0 2.84L12 20.53a4.008 4.008 0 0 1-5.66 0L2.81 17c-.78-.79-.78-2.05 0-2.84l10.6-10.6c.79-.78 2.05-.78 2.83 0M4.22 15.58l3.54 3.53c.78.79 2.04.79 2.83 0l3.53-3.53l-4.95-4.95l-4.95 4.95z"
 							fill="currentColor"
 						/>
 					</svg>
-					<span class="tool-label">Eraser</span>
+					<span class="tool-label">ERASE</span>
 				</button>
 				<button
 					id="stickerBtn"
@@ -184,13 +190,13 @@
 					title="Sticker Mode"
 					data-tool="sticker"
 				>
-					<svg viewBox="0 0 24 24" width="24" height="24">
+					<svg class="tool-btn-svg" viewBox="0 0 24 24" width="24" height="24">
 						<path
 							d="M5.5 2C3.56 2 2 3.56 2 5.5v13C2 20.44 3.56 22 5.5 22H16l6-6V5.5C22 3.56 20.44 2 18.5 2H5.5zm0 6h6.5v2H5.5V8zm0 4h3.5v2H5.5v-4z"
 							fill="currentColor"
 						/>
 					</svg>
-					<span class="tool-label">Sticker</span>
+					<span class="tool-label">STICKER</span>
 				</button>
 			</div>
 
@@ -220,36 +226,20 @@
 			</div>
 
 			<!-- Floating Brush Panel -->
+			<!-- Floating Brush Panel -->
 			<div class="floating-brush-panel" id="brush-controls">
-				<button class="panel-toggle-btn" id="brush-panel-toggle">×</button>
 				<div class="panel-header">
 					<span>Brush Settings</span>
 				</div>
-				<div class="panel-mini-controls">
-					<div class="mini-control" id="brush-size-mini">20px</div>
-					<div
-						class="mini-control"
-						id="brush-color-mini"
-						style="background: #ff0000; color: white"
-					>
-						●
-					</div>
-				</div>
+
 				<div class="control-group">
-					<label>Pick Color</label>
-					<div class="color-picker-container">
-						<input
-							type="color"
-							id="brushColor"
-							value="#ff0000"
-							title="Brush Color"
-							class="square-color-picker"
-						/>
-						<div class="color-preview-indicator">
-							<span class="color-preview-box" id="colorPreviewBox" style="background: #ff0000;"></span>
-							<span class="color-preview-text">Selected Color</span>
-						</div>
-					</div>
+					<label>Color</label>
+					<input
+						type="color"
+						id="brushColor"
+						value="#ff0000"
+						title="Brush Color"
+					/>
 					<div class="color-history" id="color-history">
 						<div class="color-history-header">Recent Colors</div>
 						<div class="color-history-grid" id="color-history-grid">
@@ -258,7 +248,7 @@
 					</div>
 				</div>
 				<div class="control-group">
-					<label>Size: <span id="brushSizeValue">20</span>px [ ]</label>
+					<label>Size: <span id="brushSizeValue">20</span></label>
 					<input type="range" id="brushSize" min="1" max="100" value="20" />
 				</div>
 				<div class="control-group">
@@ -276,12 +266,8 @@
 
 			<!-- Floating Stickers Panel -->
 			<div class="floating-sticker-panel" id="sticker-panel">
-				<button class="panel-toggle-btn" id="sticker-panel-toggle">×</button>
 				<div class="panel-header">
 					<span>Stickers</span>
-				</div>
-				<div class="panel-mini-controls">
-					<div class="mini-control" id="sticker-size-mini">100px</div>
 				</div>
 				<div class="control-group">
 					<label>Size: <span id="stickerSizeValue">100</span>px</label>
@@ -299,22 +285,18 @@
 				</div>
 			</div>
 
-			<!-- Floating Toggle Buttons (when panels are hidden) -->
-			<div class="floating-panel-toggle paint-toggle" id="paint-toggle">🎨</div>
-			<div class="floating-panel-toggle sticker-toggle" id="sticker-toggle">
-				🏷️
-			</div>
-
 			<!-- Undo/Redo Panel -->
 			<div class="undo-redo-panel">
-				<button class="undo-btn" id="undo-btn" title="Undo">↶</button>
-				<button class="redo-btn" id="redo-btn" title="Redo">↷</button>
+				<button class="undo-btn" id="undo-btn" title="Undo (Ctrl+Z)" disabled>
+					↶
+				</button>
+				<button class="redo-btn" id="redo-btn" title="Redo (Ctrl+Y)" disabled>
+					↷
+				</button>
 			</div>
 
 			<div class="screen-actions">
-				<button id="back-to-base" class="btn-secondary">
-					Go Back
-				</button>
+				<button id="back-to-base" class="btn-secondary">Go Back</button>
 				<button id="next-to-pose" class="btn-primary">
 					Continue to Lighting
 				</button>
@@ -382,12 +364,8 @@
 			</div>
 
 			<div class="screen-actions">
-				<button id="back-to-paint" class="btn-secondary">
-					Go Back
-				</button>
-				<button id="save-creation" class="btn-finish">
-					Download Creation
-				</button>
+				<button id="back-to-paint" class="btn-secondary">Go Back</button>
+				<button id="save-creation" class="btn-finish">Download Creation</button>
 			</div>
 		</div>
 
