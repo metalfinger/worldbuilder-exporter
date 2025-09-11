@@ -5,8 +5,8 @@
    ================================= */
 :root {
 	/* Base font size for rem calculations - 16px default */
-	font-size: 1vw;
-
+	font-size: 16px;
+	
 	/* Primary Brand Colors - Solid Industry Standard */
 	--primary-color: #fbff00; /* Blue 600 - Professional primary */
 	--primary-hover: #c4de00; /* Blue 700 - Hover state */
@@ -61,7 +61,20 @@
 
 /* Responsive font size scaling for rem units */
 html {
-	font-size: 1vw; /* Base size for rem calculations */
+	font-size: 16px; /* Base size for rem calculations */
+}
+
+/* Responsive scaling for different screen sizes */
+@media (max-width: 48rem) {
+	html {
+		font-size: 14px; /* Smaller base for mobile */
+	}
+}
+
+@media (min-width: 80rem) {
+	html {
+		font-size: 18px; /* Larger base for large screens */
+	}
 }
 
 * {
@@ -149,7 +162,7 @@ body {
 .floating-minimap:hover,
 .floating-record-panel:hover {
 	border-color: var(--glass-border-hover);
-	box-shadow: var(--glass-shadow), 0 0 20px var(--primary-glow);
+	box-shadow: var(--glass-shadow), 0 0 1.25rem var(--primary-glow);
 }
 
 /* =================================
@@ -2062,10 +2075,10 @@ body[data-mode="record"] #sticker-preview {
 	-webkit-backdrop-filter: blur(16px) saturate(1.4) brightness(1.1);
 	border: 1px solid var(--glass-border);
 	border-radius: var(--border-radius);
-	padding: 2rem;
+	padding: 24px;
 	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1),
 		inset 0 1px 0 rgba(255, 255, 255, 0.3);
-	width: 20rem;
+	width: 280px;
 	will-change: transform, opacity;
 }
 
@@ -2077,9 +2090,9 @@ body[data-mode="record"] #sticker-preview {
 }
 
 .color-option {
-	width: 3rem;
-	height: 3rem;
-	border-radius: 4.3rem;
+	width: 45px;
+	height: 45px;
+	border-radius: 10px;
 	cursor: pointer;
 	transition: all 0.3s ease;
 	border: 3px solid transparent;
@@ -2104,9 +2117,8 @@ body[data-mode="record"] #sticker-preview {
 	left: 50%;
 	transform: translate(-50%, -50%);
 	color: white;
-	font-size: 3rem;
+	font-size: 18px;
 	font-weight: bold;
-	font-family: monospace;
 	text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 

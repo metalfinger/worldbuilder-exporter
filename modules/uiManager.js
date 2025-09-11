@@ -66,6 +66,11 @@ const stickerFiles = [
 ];
 const loadedStickers = {};
 
+// Custom sticker management
+const customStickers = new Map(); // Store custom stickers with unique IDs
+let customStickerCounter = 0;
+let currentStickerCategory = "default"; // Track current category view
+
 function hexToRgba(hex, alpha) {
 	const r = parseInt(hex.slice(1, 3), 16);
 	const g = parseInt(hex.slice(3, 5), 16);
@@ -1213,9 +1218,24 @@ export function setupUI(camera, renderer, controls) {
 	const stickerBtn = document.getElementById("stickerBtn");
 
 	const modeStatus = document.getElementById("mode-status");
-	const stickerList = document.getElementById("sticker-list");
+	// Updated sticker list references for new structure
+	const stickerListDefault = document.getElementById("sticker-list-default");
+	const stickerListCustom = document.getElementById("sticker-list-custom");
+	const stickerList = stickerListDefault; // Keep for backward compatibility
 	const stickerSizeInput = document.getElementById("stickerSize");
 	const stickerSizeValue = document.getElementById("stickerSizeValue");
+
+	// Custom sticker upload elements
+	const customStickerInput = document.getElementById("custom-sticker-input");
+	const stickerUploadZone = document.getElementById("sticker-upload-zone");
+	const uploadProgress = document.getElementById("upload-progress");
+	const progressFill = document.getElementById("progress-fill");
+	const progressText = document.getElementById("progress-text");
+	const noCustomStickers = document.getElementById("no-custom-stickers");
+
+	// Category tab elements
+	const categoryTabs = document.querySelectorAll(".category-tab");
+	const stickerGrids = document.querySelectorAll(".sticker-grid");
 
 	// Cache cursor elements for performance
 	brushIndicatorElement = document.getElementById("brush2dIndicator");
@@ -1673,7 +1693,7 @@ export function setupUI(camera, renderer, controls) {
 						);
 					});
 
-					stickerList.appendChild(stickerEl);
+					stickerListDefault.appendChild(stickerEl);
 
 					if (index === 0) {
 						stickerEl.classList.add("selected");
@@ -1687,6 +1707,304 @@ export function setupUI(camera, renderer, controls) {
 				}
 			);
 		});
+	}
+
+	// Custom Sticker Management Functions
+	function initializeCustomStickerFeatures() {
+		// Load saved custom stickers from localStorage
+		loadCustomStickersFromStorage();
+
+		// Category tab switching
+		categoryTabs.forEach((tab) => {
+			tab.addEventListener("click", () => {
+				const category = tab.dataset.category;
+				switchStickerCategory(category);
+			});
+		});
+
+		// File upload zone click handler
+		if (stickerUploadZone) {
+			stickerUploadZone.addEventListener("click", () => {
+				customStickerInput.click();
+			});
+
+			// Drag and drop handlers
+			stickerUploadZone.addEventListener("dragover", handleDragOver);
+			stickerUploadZone.addEventListener("dragleave", handleDragLeave);
+			stickerUploadZone.addEventListener("drop", handleDrop);
+		}
+
+		// File input change handler
+		if (customStickerInput) {
+			customStickerInput.addEventListener("change", (e) => {
+				const files = Array.from(e.target.files);
+				handleCustomStickerUpload(files);
+			});
+		}
+	}
+
+	function switchStickerCategory(category) {
+		currentStickerCategory = category;
+
+		// Update tab states
+		categoryTabs.forEach((tab) => {
+			tab.classList.toggle("active", tab.dataset.category === category);
+		});
+
+		// Update grid visibility
+		stickerGrids.forEach((grid) => {
+			grid.classList.toggle("active", grid.id === `sticker-list-${category}`);
+		});
+
+		// Update no custom stickers message visibility
+		if (category === "custom" && customStickers.size === 0) {
+			noCustomStickers.style.display = "block";
+		} else {
+			noCustomStickers.style.display = "none";
+		}
+	}
+
+	function handleDragOver(e) {
+		e.preventDefault();
+		stickerUploadZone.classList.add("drag-over");
+	}
+
+	function handleDragLeave(e) {
+		e.preventDefault();
+		stickerUploadZone.classList.remove("drag-over");
+	}
+
+	function handleDrop(e) {
+		e.preventDefault();
+		stickerUploadZone.classList.remove("drag-over");
+
+		const files = Array.from(e.dataTransfer.files).filter((file) =>
+			file.type.startsWith("image/")
+		);
+
+		if (files.length > 0) {
+			handleCustomStickerUpload(files);
+		} else {
+			showNotification("Please drop image files only", "warning");
+		}
+	}
+
+	function handleCustomStickerUpload(files) {
+		const validImageTypes = [
+			"image/jpeg",
+			"image/jpg",
+			"image/png",
+			"image/gif",
+			"image/webp",
+		];
+		const maxFileSize = 5 * 1024 * 1024; // 5MB limit
+
+		const validFiles = files.filter((file) => {
+			if (!validImageTypes.includes(file.type)) {
+				showNotification(`Invalid file type: ${file.name}`, "error");
+				return false;
+			}
+			if (file.size > maxFileSize) {
+				showNotification(`File too large: ${file.name} (max 5MB)`, "error");
+				return false;
+			}
+			return true;
+		});
+
+		if (validFiles.length === 0) return;
+
+		// Show progress
+		uploadProgress.style.display = "block";
+		progressText.textContent = `Uploading ${validFiles.length} sticker(s)...`;
+
+		let processed = 0;
+		const total = validFiles.length;
+
+		validFiles.forEach((file) => {
+			processCustomSticker(file, () => {
+				processed++;
+				const progress = (processed / total) * 100;
+				progressFill.style.width = `${progress}%`;
+
+				if (processed === total) {
+					setTimeout(() => {
+						uploadProgress.style.display = "none";
+						progressFill.style.width = "0%";
+					}, 1000);
+
+					showNotification(
+						`Successfully uploaded ${total} sticker(s)!`,
+						"success"
+					);
+					saveCustomStickersToStorage();
+				}
+			});
+		});
+	}
+
+	function processCustomSticker(file, onComplete) {
+		const reader = new FileReader();
+
+		reader.onload = (e) => {
+			const img = new Image();
+			img.onload = () => {
+				// Generate unique ID for custom sticker
+				const stickerId = `custom_${Date.now()}_${customStickerCounter++}`;
+
+				// Create canvas to optimize image
+				const canvas = document.createElement("canvas");
+				const ctx = canvas.getContext("2d");
+
+				// Resize image if too large (max 512x512 for performance)
+				const maxSize = 512;
+				let { width, height } = img;
+
+				if (width > maxSize || height > maxSize) {
+					const scale = Math.min(maxSize / width, maxSize / height);
+					width = Math.floor(width * scale);
+					height = Math.floor(height * scale);
+				}
+
+				canvas.width = width;
+				canvas.height = height;
+				ctx.drawImage(img, 0, 0, width, height);
+
+				// Convert to data URL for storage
+				const dataUrl = canvas.toDataURL("image/webp", 0.8);
+
+				// Store in memory
+				customStickers.set(stickerId, {
+					id: stickerId,
+					name: file.name,
+					dataUrl: dataUrl,
+					image: img,
+					timestamp: Date.now(),
+				});
+
+				// Add to UI
+				addCustomStickerToUI(stickerId, dataUrl, file.name);
+
+				onComplete();
+			};
+			img.src = e.target.result;
+		};
+
+		reader.readAsDataURL(file);
+	}
+
+	function addCustomStickerToUI(stickerId, dataUrl, fileName) {
+		const stickerEl = document.createElement("div");
+		stickerEl.className = "sticker-item custom-sticker";
+		stickerEl.style.backgroundImage = `url(${dataUrl})`;
+		stickerEl.dataset.stickerId = stickerId;
+		stickerEl.title = fileName;
+
+		// Add delete button
+		const deleteBtn = document.createElement("button");
+		deleteBtn.className = "delete-sticker";
+		deleteBtn.innerHTML = "×";
+		deleteBtn.title = "Delete sticker";
+		deleteBtn.addEventListener("click", (e) => {
+			e.stopPropagation();
+			deleteCustomSticker(stickerId);
+		});
+		stickerEl.appendChild(deleteBtn);
+
+		// Click handler for selection
+		stickerEl.addEventListener("click", () => {
+			document
+				.querySelectorAll(".sticker-item.selected")
+				.forEach((el) => el.classList.remove("selected"));
+			stickerEl.classList.add("selected");
+
+			const customSticker = customStickers.get(stickerId);
+			if (customSticker) {
+				selectedSticker = customSticker.image;
+
+				// Update sticker preview immediately
+				if (stickerPreviewElement && mode === "sticker") {
+					updateStickerPreviewImage();
+				}
+
+				showNotification(`Custom sticker selected: ${fileName}`, "success");
+			}
+		});
+
+		stickerListCustom.appendChild(stickerEl);
+
+		// Hide no custom stickers message
+		if (noCustomStickers) {
+			noCustomStickers.style.display = "none";
+		}
+	}
+
+	function deleteCustomSticker(stickerId) {
+		if (customStickers.has(stickerId)) {
+			// Remove from memory
+			customStickers.delete(stickerId);
+
+			// Remove from UI
+			const stickerEl = document.querySelector(
+				`[data-sticker-id="${stickerId}"]`
+			);
+			if (stickerEl) {
+				stickerEl.remove();
+			}
+
+			// Show empty message if no custom stickers left
+			if (customStickers.size === 0 && currentStickerCategory === "custom") {
+				noCustomStickers.style.display = "block";
+			}
+
+			// Save updated list
+			saveCustomStickersToStorage();
+
+			showNotification("Custom sticker deleted", "info");
+		}
+	}
+
+	function loadCustomStickersFromStorage() {
+		try {
+			const stored = localStorage.getItem("worldbuilder_custom_stickers");
+			if (stored) {
+				const data = JSON.parse(stored);
+				data.forEach((stickerData) => {
+					const img = new Image();
+					img.onload = () => {
+						customStickers.set(stickerData.id, {
+							...stickerData,
+							image: img,
+						});
+						addCustomStickerToUI(
+							stickerData.id,
+							stickerData.dataUrl,
+							stickerData.name
+						);
+					};
+					img.src = stickerData.dataUrl;
+				});
+			}
+		} catch (error) {
+			console.error("Failed to load custom stickers:", error);
+		}
+	}
+
+	function saveCustomStickersToStorage() {
+		try {
+			const dataToSave = Array.from(customStickers.values()).map((sticker) => ({
+				id: sticker.id,
+				name: sticker.name,
+				dataUrl: sticker.dataUrl,
+				timestamp: sticker.timestamp,
+			}));
+			localStorage.setItem(
+				"worldbuilder_custom_stickers",
+				JSON.stringify(dataToSave)
+			);
+		} catch (error) {
+			console.error("Failed to save custom stickers:", error);
+			showNotification("Failed to save custom stickers", "error");
+		}
 	}
 
 	// Performance-optimized mouse and touch event listeners
@@ -1826,6 +2144,7 @@ export function setupUI(camera, renderer, controls) {
 
 	// Initialize everything
 	loadStickers();
+	initializeCustomStickerFeatures(); // Initialize custom sticker upload functionality
 	updateLayerUI();
 	updatePanelVisibility();
 
