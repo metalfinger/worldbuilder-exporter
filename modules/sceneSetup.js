@@ -154,12 +154,12 @@ function setupStudioLighting() {
 
 	// Fill light from opposite side - more subtle
 	fillLight = new THREE.DirectionalLight(0xffffff, 0.4); // Reduced from 1.0
-	fillLight.position.set(-2, 2, -1); // Better positioning to avoid back-lighting
+	fillLight.position.set(-2, 2, 1); // Better positioning to avoid back-lighting
 	scene.add(fillLight);
 
 	// Rim light for better definition - reduced intensity
 	const rimLight = new THREE.DirectionalLight(0xffffff, 0.3); // Reduced from 0.8
-	rimLight.position.set(0, 2, -3); // Adjusted position
+	rimLight.position.set(0, 2, -1); // Adjusted position
 	scene.add(rimLight);
 }
 
@@ -190,7 +190,7 @@ function setupOutdoorLighting() {
 
 	// Sky reflection/bounce light - more subtle
 	fillLight = new THREE.DirectionalLight(0x87ceeb, 0.2); // Reduced from 0.3
-	fillLight.position.set(-2, 4, -2);
+	fillLight.position.set(-2, 4, 2);
 	scene.add(fillLight);
 }
 
@@ -221,7 +221,7 @@ function setupSunsetLighting() {
 
 	// Ambient sunset glow - more subtle
 	fillLight = new THREE.DirectionalLight(0xff9966, 0.25); // Reduced from 0.4
-	fillLight.position.set(2, 1, -2);
+	fillLight.position.set(2, 1, 2);
 	scene.add(fillLight);
 }
 
@@ -237,7 +237,7 @@ function setupNightLighting() {
 
 	// Moonlight - soft directional light from above
 	directionalLight = new THREE.DirectionalLight(0x7f9cf5, 0.8);
-	directionalLight.position.set(0, 5, -2);
+	directionalLight.position.set(0, 5, 2);
 	directionalLight.castShadow = true;
 	directionalLight.shadow.mapSize.width = 2048;
 	directionalLight.shadow.mapSize.height = 2048;
@@ -245,7 +245,7 @@ function setupNightLighting() {
 
 	// Ambient light for visibility
 	fillLight = new THREE.DirectionalLight(0x4a5cb0, 0.2);
-	fillLight.position.set(2, 1, 2);
+	fillLight.position.set(-2, 1, 2);
 	scene.add(fillLight);
 }
 
@@ -269,7 +269,7 @@ function setupForestLighting() {
 
 	// Fill light from environment
 	fillLight = new THREE.DirectionalLight(0x66bb6a, 0.3);
-	fillLight.position.set(-2, 2, -1);
+	fillLight.position.set(-2, 2, 1);
 	scene.add(fillLight);
 }
 
@@ -293,7 +293,7 @@ function setupBeachLighting() {
 
 	// Sky reflection
 	fillLight = new THREE.DirectionalLight(0xfff59d, 0.4);
-	fillLight.position.set(-2, 3, -2);
+	fillLight.position.set(-2, 3, 2);
 	scene.add(fillLight);
 }
 
@@ -317,7 +317,7 @@ function setupDawnLighting() {
 
 	// Soft fill light
 	fillLight = new THREE.DirectionalLight(0xf8bbd0, 0.3);
-	fillLight.position.set(-1, 2, -1);
+	fillLight.position.set(-1, 2, 1);
 	scene.add(fillLight);
 }
 
@@ -341,7 +341,7 @@ function setupCloudyLighting() {
 
 	// Soft fill
 	fillLight = new THREE.DirectionalLight(0xb0bec5, 0.2);
-	fillLight.position.set(-2, 2, -1);
+	fillLight.position.set(-2, 2, 1);
 	scene.add(fillLight);
 }
 
@@ -365,7 +365,7 @@ function setupIndoorLighting() {
 
 	// Ambient fill
 	fillLight = new THREE.DirectionalLight(0xeeeeee, 0.3);
-	fillLight.position.set(2, 1, -2);
+	fillLight.position.set(2, 1, 2);
 	scene.add(fillLight);
 }
 
