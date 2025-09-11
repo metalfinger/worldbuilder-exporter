@@ -3,7 +3,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
 
 let scene, camera, renderer, controls;
-let hemisphereLight, directionalLight, fillLight;
+let hemisphereLight, directionalLight, fillLight, rimLight;
 let currentEnvironment = null; // Start as null so first apply always works
 
 let studioHDRI = null;
@@ -107,12 +107,28 @@ function createWhiteEnvironment() {
 	return texture;
 }
 
-function setupMinimalLighting() {
-	// Clear existing lights
-	if (hemisphereLight) scene.remove(hemisphereLight);
-	if (directionalLight) scene.remove(directionalLight);
-	if (fillLight) scene.remove(fillLight);
+// Centralized function to clear all lights from the scene
+function clearAllLights() {
+	if (hemisphereLight) {
+		scene.remove(hemisphereLight);
+		hemisphereLight = null;
+	}
+	if (directionalLight) {
+		scene.remove(directionalLight);
+		directionalLight = null;
+	}
+	if (fillLight) {
+		scene.remove(fillLight);
+		fillLight = null;
+	}
+	if (rimLight) {
+		scene.remove(rimLight);
+		rimLight = null;
+	}
+	console.log("All lights cleared from scene");
+}
 
+function setupMinimalLighting() {
 	// Very minimal lighting since the white environment provides most illumination
 	hemisphereLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.8);
 	scene.add(hemisphereLight);
@@ -127,11 +143,6 @@ function setupMinimalLighting() {
 }
 
 function setupStudioLighting() {
-	// Clear existing lights
-	if (hemisphereLight) scene.remove(hemisphereLight);
-	if (directionalLight) scene.remove(directionalLight);
-	if (fillLight) scene.remove(fillLight);
-
 	// Balanced studio lighting - optimized for visibility
 	hemisphereLight = new THREE.HemisphereLight(0xffffff, 0xf0f0f0, 1.0); // Increased for better visibility
 	scene.add(hemisphereLight);
@@ -158,17 +169,12 @@ function setupStudioLighting() {
 	scene.add(fillLight);
 
 	// Rim light for better definition - reduced intensity
-	const rimLight = new THREE.DirectionalLight(0xffffff, 0.3); // Reduced from 0.8
+	rimLight = new THREE.DirectionalLight(0xffffff, 0.3); // Reduced from 0.8
 	rimLight.position.set(0, 2, -1); // Adjusted position
 	scene.add(rimLight);
 }
 
 function setupOutdoorLighting() {
-	// Clear existing lights
-	if (hemisphereLight) scene.remove(hemisphereLight);
-	if (directionalLight) scene.remove(directionalLight);
-	if (fillLight) scene.remove(fillLight);
-
 	// Outdoor lighting setup - more natural and less intense
 	hemisphereLight = new THREE.HemisphereLight(0x87ceeb, 0x4682b4, 0.6); // Reduced from 0.8
 	scene.add(hemisphereLight);
@@ -195,11 +201,6 @@ function setupOutdoorLighting() {
 }
 
 function setupSunsetLighting() {
-	// Clear existing lights
-	if (hemisphereLight) scene.remove(hemisphereLight);
-	if (directionalLight) scene.remove(directionalLight);
-	if (fillLight) scene.remove(fillLight);
-
 	// Sunset lighting setup - warmer but more balanced
 	hemisphereLight = new THREE.HemisphereLight(0xff8a50, 0xf7931e, 0.5); // Reduced from 0.6
 	scene.add(hemisphereLight);
@@ -225,36 +226,64 @@ function setupSunsetLighting() {
 	scene.add(fillLight);
 }
 
-function setupNightLighting() {
-	// Clear existing lights
-	if (hemisphereLight) scene.remove(hemisphereLight);
-	if (directionalLight) scene.remove(directionalLight);
-	if (fillLight) scene.remove(fillLight);
-
-	// Night lighting - dark with moonlight
-	hemisphereLight = new THREE.HemisphereLight(0x1a237e, 0x0c1445, 0.3);
+function setupGoldenHourLighting() {
+	// Golden hour lighting - warm, low-angle light
+	hemisphereLight = new THREE.HemisphereLight(0xfff4e6, 0xffb366, 0.6);
 	scene.add(hemisphereLight);
 
-	// Moonlight - soft directional light from above
-	directionalLight = new THREE.DirectionalLight(0x7f9cf5, 0.8);
-	directionalLight.position.set(0, 5, 2);
+	// Low-angle golden sun
+	directionalLight = new THREE.DirectionalLight(0xffcc80, 1.1);
+	directionalLight.position.set(5, 2, 3); // Low angle for golden hour
 	directionalLight.castShadow = true;
 	directionalLight.shadow.mapSize.width = 2048;
 	directionalLight.shadow.mapSize.height = 2048;
 	scene.add(directionalLight);
 
-	// Ambient light for visibility
-	fillLight = new THREE.DirectionalLight(0x4a5cb0, 0.2);
+	// Warm fill light
+	fillLight = new THREE.DirectionalLight(0xffe0b3, 0.4);
 	fillLight.position.set(-2, 1, 2);
 	scene.add(fillLight);
 }
 
-function setupForestLighting() {
-	// Clear existing lights
-	if (hemisphereLight) scene.remove(hemisphereLight);
-	if (directionalLight) scene.remove(directionalLight);
-	if (fillLight) scene.remove(fillLight);
+function setupOvercastLighting() {
+	// Overcast lighting - soft, even illumination
+	hemisphereLight = new THREE.HemisphereLight(0xe8e8e8, 0xcccccc, 0.9);
+	scene.add(hemisphereLight);
 
+	// Soft overhead light simulating overcast sky
+	directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
+	directionalLight.position.set(0, 6, 2);
+	directionalLight.castShadow = true;
+	directionalLight.shadow.mapSize.width = 2048;
+	directionalLight.shadow.mapSize.height = 2048;
+	scene.add(directionalLight);
+
+	// Very soft fill for even lighting
+	fillLight = new THREE.DirectionalLight(0xf5f5f5, 0.3);
+	fillLight.position.set(2, 2, 2);
+	scene.add(fillLight);
+}
+
+function setupDramaticLighting() {
+	// Dramatic lighting - high contrast with strong shadows
+	hemisphereLight = new THREE.HemisphereLight(0x404040, 0x202020, 0.4);
+	scene.add(hemisphereLight);
+
+	// Strong key light from side
+	directionalLight = new THREE.DirectionalLight(0xffffff, 1.5);
+	directionalLight.position.set(6, 4, 1); // Side lighting for drama
+	directionalLight.castShadow = true;
+	directionalLight.shadow.mapSize.width = 2048;
+	directionalLight.shadow.mapSize.height = 2048;
+	scene.add(directionalLight);
+
+	// Minimal fill light to maintain contrast
+	fillLight = new THREE.DirectionalLight(0x808080, 0.2);
+	fillLight.position.set(-1, 2, 3);
+	scene.add(fillLight);
+}
+
+function setupForestLighting() {
 	// Forest lighting - green-tinted ambient
 	hemisphereLight = new THREE.HemisphereLight(0x4caf50, 0x1b5e20, 0.6);
 	scene.add(hemisphereLight);
@@ -274,11 +303,6 @@ function setupForestLighting() {
 }
 
 function setupBeachLighting() {
-	// Clear existing lights
-	if (hemisphereLight) scene.remove(hemisphereLight);
-	if (directionalLight) scene.remove(directionalLight);
-	if (fillLight) scene.remove(fillLight);
-
 	// Beach lighting - warm ambient
 	hemisphereLight = new THREE.HemisphereLight(0xfff176, 0xf57f17, 0.7);
 	scene.add(hemisphereLight);
@@ -298,11 +322,6 @@ function setupBeachLighting() {
 }
 
 function setupDawnLighting() {
-	// Clear existing lights
-	if (hemisphereLight) scene.remove(hemisphereLight);
-	if (directionalLight) scene.remove(directionalLight);
-	if (fillLight) scene.remove(fillLight);
-
 	// Dawn lighting - soft purple/pink ambient
 	hemisphereLight = new THREE.HemisphereLight(0xff80ab, 0xe1bee7, 0.5);
 	scene.add(hemisphereLight);
@@ -322,11 +341,6 @@ function setupDawnLighting() {
 }
 
 function setupCloudyLighting() {
-	// Clear existing lights
-	if (hemisphereLight) scene.remove(hemisphereLight);
-	if (directionalLight) scene.remove(directionalLight);
-	if (fillLight) scene.remove(fillLight);
-
 	// Cloudy lighting - neutral ambient
 	hemisphereLight = new THREE.HemisphereLight(0xcfd8dc, 0x90a4ae, 0.8);
 	scene.add(hemisphereLight);
@@ -342,30 +356,6 @@ function setupCloudyLighting() {
 	// Soft fill
 	fillLight = new THREE.DirectionalLight(0xb0bec5, 0.2);
 	fillLight.position.set(-2, 2, 1);
-	scene.add(fillLight);
-}
-
-function setupIndoorLighting() {
-	// Clear existing lights
-	if (hemisphereLight) scene.remove(hemisphereLight);
-	if (directionalLight) scene.remove(directionalLight);
-	if (fillLight) scene.remove(fillLight);
-
-	// Indoor lighting - neutral with slight warmth
-	hemisphereLight = new THREE.HemisphereLight(0xe0e0e0, 0x9e9e9e, 0.6);
-	scene.add(hemisphereLight);
-
-	// Overhead lighting
-	directionalLight = new THREE.DirectionalLight(0xffffff, 1.1);
-	directionalLight.position.set(0, 5, 2);
-	directionalLight.castShadow = true;
-	directionalLight.shadow.mapSize.width = 2048;
-	directionalLight.shadow.mapSize.height = 2048;
-	scene.add(directionalLight);
-
-	// Ambient fill
-	fillLight = new THREE.DirectionalLight(0xeeeeee, 0.3);
-	fillLight.position.set(2, 1, 2);
 	scene.add(fillLight);
 }
 
@@ -427,6 +417,9 @@ export function applyEnvironment(environmentType, forceApply = false) {
 		}`
 	);
 
+	// Clear all existing lights before applying new environment
+	clearAllLights();
+
 	switch (environmentType) {
 		case "studio":
 			scene.background = new THREE.Color(0xf8f8f8); // Brighter background for better visibility
@@ -470,13 +463,35 @@ export function applyEnvironment(environmentType, forceApply = false) {
 			);
 			break;
 
-		case "night":
-			scene.background = new THREE.Color(0x0c1445); // Dark blue background
+		case "golden-hour":
+			scene.background = new THREE.Color(0xfff4e6); // Warm golden background
 			scene.environment = null; // Remove environment to rely on lighting
-			setupNightLighting();
-			renderer.toneMappingExposure = 0.6;
+			setupGoldenHourLighting();
+			renderer.toneMappingExposure = 1.0;
 			console.log(
-				"🌙 Night environment applied with tone mapping:",
+				"🌅 Golden hour environment applied with tone mapping:",
+				renderer.toneMappingExposure
+			);
+			break;
+
+		case "overcast":
+			scene.background = new THREE.Color(0xe8e8e8); // Soft gray background
+			scene.environment = null; // Remove environment to rely on lighting
+			setupOvercastLighting();
+			renderer.toneMappingExposure = 0.8;
+			console.log(
+				"☁️ Overcast environment applied with tone mapping:",
+				renderer.toneMappingExposure
+			);
+			break;
+
+		case "dramatic":
+			scene.background = new THREE.Color(0x303030); // Dark background for drama
+			scene.environment = null; // Remove environment to rely on lighting
+			setupDramaticLighting();
+			renderer.toneMappingExposure = 0.9;
+			console.log(
+				"� Dramatic environment applied with tone mapping:",
 				renderer.toneMappingExposure
 			);
 			break;
@@ -521,17 +536,6 @@ export function applyEnvironment(environmentType, forceApply = false) {
 			renderer.toneMappingExposure = 0.7;
 			console.log(
 				"☁️ Cloudy environment applied with tone mapping:",
-				renderer.toneMappingExposure
-			);
-			break;
-
-		case "indoor":
-			scene.background = new THREE.Color(0x9e9e9e); // Neutral gray background
-			scene.environment = null; // Remove environment to rely on lighting
-			setupIndoorLighting();
-			renderer.toneMappingExposure = 0.8;
-			console.log(
-				"🏠 Indoor environment applied with tone mapping:",
 				renderer.toneMappingExposure
 			);
 			break;

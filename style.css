@@ -2242,10 +2242,6 @@ body[data-screen="paint"] #screen-paint .undo-redo-panel {
 	background: linear-gradient(135deg, #ff6b35, #f7931e);
 }
 
-.hdri-preview.night {
-	background: linear-gradient(135deg, #0c1445, #1a237e);
-}
-
 .hdri-preview.forest {
 	background: linear-gradient(135deg, #1b5e20, #4caf50);
 }
@@ -2262,8 +2258,16 @@ body[data-screen="paint"] #screen-paint .undo-redo-panel {
 	background: linear-gradient(135deg, #90a4ae, #cfd8dc);
 }
 
-.hdri-preview.indoor {
-	background: linear-gradient(135deg, #757575, #bdbdbd);
+.hdri-preview.golden-hour {
+	background: linear-gradient(135deg, #ffa726, #ff8f00);
+}
+
+.hdri-preview.overcast {
+	background: linear-gradient(135deg, #78909c, #546e7a);
+}
+
+.hdri-preview.dramatic {
+	background: linear-gradient(135deg, #424242, #616161);
 }
 
 .pose-btn span,
