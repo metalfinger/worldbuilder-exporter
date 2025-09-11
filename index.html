@@ -11,7 +11,7 @@
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link
-			href="https://fonts.googleapis.com/css2?family=Bungee+Tint&family=Sixtyfour+Convergence&display=swap"
+			href="https://fonts.googleapis.com/css2?family=Bitcount+Grid+Double&display=swap"
 			rel="stylesheet"
 		/>
 		<link rel="stylesheet" href="style.css" />
@@ -226,13 +226,12 @@
 			</div>
 
 			<!-- Floating Brush Panel -->
-			<!-- Floating Brush Panel -->
 			<div class="floating-brush-panel" id="brush-controls">
 				<div class="panel-header">
 					<span>Brush Settings</span>
 				</div>
 
-				<div class="control-group">
+				<div class="control-group" id="color-row">
 					<label>Color</label>
 					<input
 						type="color"
@@ -250,6 +249,17 @@
 				<div class="control-group">
 					<label>Size: <span id="brushSizeValue">20</span></label>
 					<input type="range" id="brushSize" min="1" max="100" value="20" />
+				</div>
+				<div class="control-group" id="opacity-row">
+					<label>Opacity: <span id="brushOpacityValue">1.0</span></label>
+					<input
+						type="range"
+						id="brushOpacity"
+						min="0.1"
+						max="1"
+						step="0.05"
+						value="1"
+					/>
 				</div>
 			</div>
 

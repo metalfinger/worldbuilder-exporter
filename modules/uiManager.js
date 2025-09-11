@@ -1316,10 +1316,16 @@ export function setupUI(camera, renderer, controls) {
 		const brushHeader = document.querySelector(
 			".floating-brush-panel .panel-header span"
 		);
+		const colorRow = document.getElementById("color-row");
+		const opacityRow = document.getElementById("opacity-row");
+		const colorHistory = document.getElementById("color-history");
 
 		if (mode === "paint" && brushHeader) {
 			brushHeader.textContent = "Brush Settings";
 			brushPanel.style.borderColor = "rgba(255, 255, 255, 0.1)";
+			if (colorRow) colorRow.style.display = "";
+			if (opacityRow) opacityRow.style.display = "";
+			if (colorHistory) colorHistory.style.display = "";
 		} else if (mode === "eraser" && brushHeader) {
 			let headerText = "Eraser Settings";
 			if (activeMask === "head") {
@@ -1329,6 +1335,9 @@ export function setupUI(camera, renderer, controls) {
 			}
 			brushHeader.textContent = headerText;
 			brushPanel.style.borderColor = "rgba(255, 107, 107, 0.3)";
+			if (colorRow) colorRow.style.display = "none";
+			if (opacityRow) opacityRow.style.display = "none";
+			if (colorHistory) colorHistory.style.display = "none";
 		}
 	}
 
