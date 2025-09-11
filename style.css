@@ -2153,7 +2153,7 @@ body[data-screen="paint"] #screen-paint .undo-redo-panel {
 .toolbar-section h3 {
 	font-size: 1rem;
 	margin-bottom: 0.75rem;
-	color: var(--text-primary);
+	color: var(--text-secondary);
 	border-bottom: 1px solid #000000;
 	padding-bottom: 0.5rem;
 }
